@@ -1,0 +1,6 @@
+@BankTechAccountSavings.API_HostAddress = http://localhost:5085
+
+GET {{BankTechAccountSavings.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
