@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BankTechAccountSavings.Domain.Models
 {
-    public class BaseEntity: IBase
+    public class BaseEntity: IBaseEntity
     {
         public Guid Id { get; set; }
         public bool IsDeleted { get; set; }

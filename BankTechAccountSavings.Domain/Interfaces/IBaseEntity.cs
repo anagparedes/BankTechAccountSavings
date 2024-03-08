@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BankTechAccountSavings.Domain.Interfaces
 {
-    public interface IBase
+    public interface IBaseEntity
     {
         public Guid Id { get; set; }
         public bool IsDeleted { get; set; }

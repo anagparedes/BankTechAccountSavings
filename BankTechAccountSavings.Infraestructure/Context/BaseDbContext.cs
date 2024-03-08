@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BankTechAccountSavings.Infraestructure.Context
 {
-    public class BaseDbContext: DbContext, IDbContext
+    public abstract class BaseDbContext: DbContext, IDbContext
     {
         protected BaseDbContext(DbContextOptions options) : base(options)
         {
@@ -19,7 +19,7 @@ namespace BankTechAccountSavings.Infraestructure.Context
         {
             string email = "Anonymous";
 
-            foreach (var entry in ChangeTracker.Entries<IBase>())
+            foreach (var entry in ChangeTracker.Entries<IBaseEntity>())
             {
                 switch (entry.State)
                 {
@@ -73,7 +73,7 @@ namespace BankTechAccountSavings.Infraestructure.Context
             base.OnModelCreating(modelBuilder);
             foreach (var type in modelBuilder.Model.GetEntityTypes())
             {
-                if (typeof(IBase).IsAssignableFrom(type.ClrType))
+                if (typeof(IBaseEntity).IsAssignableFrom(type.ClrType))
                 {
                     modelBuilder.SetSoftDeleteFilter(type.ClrType);
                 }

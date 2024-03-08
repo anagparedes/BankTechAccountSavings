@@ -14,21 +14,11 @@ namespace BankTechAccountSavings.Infraestructure.Context
 
     public class AccountSavingDbContext(DbContextOptions<AccountSavingDbContext> options):BaseDbContext(options), IAccountSavingDbContext
     {
-        public DbSet<AccountSavings> AccountSavings { get; set; }
+        public DbSet<AccountSaving> AccountSavings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var assembly = Assembly.GetAssembly(typeof(AccountSavingDbContext));
-
-            if (assembly is not null)
-            {
-                modelBuilder.ApplyConfigurationsFromAssembly(assembly);
-            }
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.EnableSensitiveDataLogging();
+            base.OnModelCreating(modelBuilder);
         }
 
     }

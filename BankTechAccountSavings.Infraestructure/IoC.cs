@@ -1,6 +1,5 @@
 ﻿using BankTechAccountSavings.Domain.Interfaces;
-using BankTechAccountSavings.Infraestructure.Repositories.AccountSaving;
-using Microsoft.Extensions.Configuration;
+using BankTechAccountSavings.Infraestructure.Repositories.AccountSavings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BankTechAccountSavings.Infraestructure
