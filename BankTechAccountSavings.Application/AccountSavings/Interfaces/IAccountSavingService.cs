@@ -1,23 +1,20 @@
 ﻿using BankTechAccountSavings.Application.AccountSavings.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using BankTechAccountSavings.Application.Transactions.Dtos;
+using BankTechAccountSavings.Domain.Enums;
 namespace BankTechAccountSavings.Application.AccountSavings.Interfaces
 {
     public interface IAccountSavingService
     {
         Task<List<GetAccountSaving>> GetAllAccountsAsync();
         Task<CreatedAccountSavingResponse?> CreateAccountSavingAsync(CreateAccountSaving createAccountSaving);
-        Task<CreatedAccountSavingResponse?> AddDepositAsync(int money, Guid id);
-        Task<CreatedAccountSavingResponse?> WithDrawAsync(int accountNumber, int money);
-        Task<CreatedAccountSavingResponse?> CloseAccountSavingAsync(int accountNumber);
-        Task<GetAccountSaving?> GetAccountSavingByIdAsync(Guid id);
-        Task<GetAccountSaving?> GetAccountSavingByAccountNumberAsync(int accountNumber);
-        Task<UpdatedAccountSavingResponse?> UpdateAccountSavingBalanceAsync(int id, CreateAccountSaving updateAccountSaving);
-        Task<UpdatedAccountSavingResponse?> UpdateAccountSavingStatusAsync(int id, CreateAccountSaving updateAccountSaving);
-        Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid id);
+        Task<GetTransaction?> AddDepositAsync(int amount, Guid accountId, string description, TransactionType transactionType);
+        Task<GetTransaction?> WithDrawAsync(int amount, Guid accountId);
+        Task<GetTransaction?> TransferFunds(Guid fromAccountId, Guid toAccountId, int transferAmount, TransactionType transactionType);
+        Task<List<GetTransaction>?> GetTransactionsHistory(Guid accountId);
+        Task<DeletedAccountSavingResponse?> CloseAccountSavingAsync(Guid accountId);
+        Task<GetAccountSaving?> GetAccountSavingByIdAsync(Guid accountId);
+        Task<GetAccountSaving?> GetAccountSavingByAccountNumberAsync(long accountNumber);
+        Task<UpdatedAccountSavingResponse?> UpdateAccountSavingAsync(Guid accountId, UpdateAccountSaving updateAccountSaving);
+        Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid accountId);
     }
 }

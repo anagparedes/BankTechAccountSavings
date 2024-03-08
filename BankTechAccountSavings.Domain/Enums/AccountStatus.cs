@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+
 
 namespace BankTechAccountSavings.Domain.Enums
 {
     public enum AccountStatus
     {
+        [Display(Name = "Active")]
         Active = 1,
-        Suspended,
+        [Display(Name = "Closed")]
         Closed
     }
 }

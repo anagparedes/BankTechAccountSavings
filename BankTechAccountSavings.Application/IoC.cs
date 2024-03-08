@@ -1,5 +1,7 @@
 ﻿using BankTechAccountSavings.Application.AccountSavings.Interfaces;
 using BankTechAccountSavings.Application.AccountSavings.Services;
+using BankTechAccountSavings.Application.Transactions.Interfaces;
+using BankTechAccountSavings.Application.Transactions.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BankTechAccountSavings.Application
@@ -9,8 +11,8 @@ namespace BankTechAccountSavings.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             return services
-                .AddScoped<IAccountSavingService, AccountSavingService>();
+                .AddScoped<IAccountSavingService, AccountSavingService>()
+                .AddScoped<ITransactionService, TransactionService>();
         }
-
     }
 }

@@ -1,19 +1,16 @@
 ﻿using BankTechAccountSavings.Domain.Entities;
 using BankTechAccountSavings.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankTechAccountSavings.Domain.Interfaces
 {
     public interface IAccountSavingRepository: IRepository<AccountSaving>
     {
         Task<AccountSaving?> GetAccountbyAccountNumber(long accountNumber);
-        Task<AccountSaving?> AddDepositAsync(int amount, Guid id, string description, TransactionType transactionType);
-        Task<AccountSaving?> WithDrawAsync(int amount, Guid id);
-        Task<AccountSaving?> CloseAccountSavingAsync(Guid id);
+        Task<List<Transfer>?> GetTransactionsHistory(Guid accountId);
+        Task<Transfer?> TransferFunds(Guid fromAccountId, Guid toAccountId, int transferAmount, TransactionType transactionType);
+        Task<Transfer?> AddDepositAsync(int amount, Guid accountId, string description, TransactionType transactionType);
+        Task<Transfer?> WithDrawAsync(int amount, Guid accountId);
+        Task<AccountSaving?> CloseAccountSavingAsync(Guid accountId);
 
 
     }

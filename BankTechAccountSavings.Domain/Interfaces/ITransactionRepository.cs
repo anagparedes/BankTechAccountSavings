@@ -10,9 +10,7 @@ namespace BankTechAccountSavings.Domain.Interfaces
 {
     public interface ITransactionRepository
     {
-        Task<List<Transaction>> GetAllAsync();
-        Task<Transaction?> GetbyIdAsync(Guid id);
-        Task<Transaction?> DeleteAsync(Guid id);
-        Task<Transaction?> TransferFunds(Guid fromAccountId, Guid toAccountId, int transferAmount, TransactionType transactionType);
+        Task<List<Transfer>> GetAllAsync();
+        Task<Transfer?> GetbyIdAsync(Guid transactionId);
     }
 }

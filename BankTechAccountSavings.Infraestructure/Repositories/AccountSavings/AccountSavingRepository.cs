@@ -1,14 +1,12 @@
-﻿using Azure.Identity;
-using BankTechAccountSavings.Domain.Entities;
+﻿using BankTechAccountSavings.Domain.Entities;
 using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Domain.Interfaces;
 using BankTechAccountSavings.Infraestructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {
-    public class AccountSavingRepository(AccountSavingDbContext context): IAccountSavingRepository
+    public class AccountSavingRepository(AccountSavingDbContext context) : IAccountSavingRepository
     {
         private readonly AccountSavingDbContext _context = context;
 
@@ -20,36 +18,36 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             {
                 entity.AccountNumber = GenerateBankAccountNumber();
             }
-            
+
             entity.AccountName ??= "CTA.AHORROS";
             entity.Bank = "BankTech";
-           /* entity.AvailableBalance = entity.CurrentBalance;
-            entity.AverageBalance = entity.CurrentBalance;*/
-            entity.AnnualInterestRate = 0.30m;
-            entity.MonthlyInterestRate = (entity.AnnualInterestRate / 12);
-            entity.Currency = entity.Currency != 0 ? entity.Currency : Domain.Enums.Currency.DOP;
-            entity.DateOpened = DateTime.Today;
-            entity.AccountStatus = Domain.Enums.AccountStatus.Active;
+            entity.CurrentBalance = entity.CurrentBalance;
+            entity.AnnualInterestRate = 0.30m / 100;
+            entity.MonthlyInterestGenerated = 0;
+            entity.Currency = entity.Currency != 0 ? entity.Currency : Currency.DOP;
+            entity.DateOpened = DateTime.UtcNow.Date;
+            entity.AccountStatus = AccountStatus.Active;
 
             _context.Set<AccountSaving>().Add(entity);
             await _context.SaveChangesAsync();
             return entity;
         }
 
-        public async Task<AccountSaving?> AddDepositAsync(int amount, Guid id, string description, TransactionType transactionType)
+        public async Task<Transfer?> AddDepositAsync(int amount, Guid accountId, string description, TransactionType transactionType)
         {
-            var account = await _context.Set<AccountSaving>().FindAsync(id);
+            var account = await _context.AccountSavings.FindAsync(accountId);
             if (account == null) return null;
             if (amount <= 0)
             {
-                throw new ApplicationException("invalid deposit amount");
+                throw new ApplicationException("Invalid Deposit Amount");
             }
             account.CurrentBalance += amount;
             account.Credit = amount;
 
-            Transaction newTransaction = new()
+            Transfer newTransaction = new()
             {
                 DestinationProduct = account,
+                DestinationProductId = account.Id,
                 TransactionDate = DateTime.Today,
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
@@ -60,15 +58,18 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 Tax = (0.0015 * amount),
                 Total = (amount + 100 + (0.0015 * amount))
             };
-            _context.Set<Transaction>().Add(newTransaction);
-            account.TransactionHistory.Add(newTransaction);
+            account.TransactionsAsDestination.Add(newTransaction);
+            _context.Set<Transfer>().Add(newTransaction);
+
+            Console.WriteLine(_context.Entry(account).State);
+
             await _context.SaveChangesAsync();
-            return account;
+            return account.TransactionsAsDestination.LastOrDefault();
         }
 
-        public async Task<AccountSaving?> WithDrawAsync(int amount, Guid id)
+        public async Task<Transfer?> WithDrawAsync(int amount, Guid accountId)
         {
-            var account = await _context.Set<AccountSaving>().FindAsync(id);
+            var account = await _context.Set<AccountSaving>().FindAsync(accountId);
             if (account == null) return null;
             if (account.CurrentBalance < amount)
             {
@@ -81,7 +82,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             account.CurrentBalance -= amount;
             account.Debit = amount;
 
-            Transaction newTransaction = new()
+            Transfer newTransaction = new()
             {
                 DestinationProduct = account,
                 TransactionDate = DateTime.Today,
@@ -90,15 +91,59 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 Amount = amount,
 
             };
-            _context.Set<Transaction>().Add(newTransaction);
-            account.TransactionHistory.Add(newTransaction);
+            _context.Set<Transfer>().Add(newTransaction);
+            account.TransactionsAsSource.Add(newTransaction);
             await _context.SaveChangesAsync();
-            return account;
+            return account.TransactionsAsSource.LastOrDefault();
         }
-       
-        public async Task<AccountSaving?> CloseAccountSavingAsync(Guid id)
+
+        public async Task<Transfer?> TransferFunds(Guid fromAccountId, Guid toAccountId, int transferAmount, TransactionType transactionType)
         {
-            var account = await _context.Set<AccountSaving>().FindAsync(id);
+            AccountSaving? fromAccount = await _context.Set<AccountSaving>().FindAsync(fromAccountId);
+            AccountSaving? toAccount = await _context.Set<AccountSaving>().FindAsync(toAccountId);
+            if (fromAccount == null || toAccount == null) return null;
+
+            if (transferAmount <= 0)
+            {
+                throw new ApplicationException("transfer amount must be positive");
+            }
+            else if (transferAmount == 0)
+            {
+                throw new ApplicationException("invalid transfer amount");
+            }
+
+            if (fromAccount.CurrentBalance < transferAmount)
+            {
+                throw new ApplicationException("Insufficient Funds");
+            }
+            fromAccount.CurrentBalance -= transferAmount;
+            fromAccount.Debit = transferAmount;
+            toAccount.CurrentBalance += transferAmount;
+            toAccount.Credit = transferAmount;
+            Transfer newTransaction = new()
+            {
+                SourceProduct = fromAccount,
+                DestinationProduct = toAccount,
+                TransactionDate = DateTime.Today,
+                ConfirmationNumber = GenerateConfirmationNumber(),
+                Voucher = GenerateVoucherNumber(),
+                TransactionType = transactionType,
+                TransactionStatus = TransactionStatus.Completed,
+                Amount = transferAmount,
+                Commission = 100,
+                Tax = (0.0015 * transferAmount),
+                Total = (transferAmount + 100 + (0.0015 * transferAmount))
+
+            };
+            fromAccount.TransactionsAsSource.Add(newTransaction);
+            toAccount.TransactionsAsDestination.Add(newTransaction);
+            return newTransaction;
+
+        }
+
+        public async Task<AccountSaving?> CloseAccountSavingAsync(Guid accountId)
+        {
+            var account = await _context.Set<AccountSaving>().FindAsync(accountId);
             if (account == null) return null;
 
             account.AccountStatus = AccountStatus.Closed;
@@ -107,9 +152,9 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return account;
         }
 
-        public async Task<AccountSaving?> DeleteAsync(Guid id)
+        public async Task<AccountSaving?> DeleteAsync(Guid accountId)
         {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == id);
+            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId);
             if (account == null) return null;
             account.AccountStatus = AccountStatus.Closed;
             _context.Set<AccountSaving>().Remove(account);
@@ -123,24 +168,38 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return await _context.Set<AccountSaving>().ToListAsync();
         }
 
-        public async Task<AccountSaving?> GetbyIdAsync(Guid id)
+        public async Task<AccountSaving?> GetbyIdAsync(Guid accountId)
         {
-            var account = await _context.Set<AccountSaving>().FindAsync(id);
+            var account = await _context.Set<AccountSaving>().FindAsync(accountId);
             if (account == null) return null;
             return account;
         }
 
-        public async Task<AccountSaving?> UpdateAsync(Guid id, AccountSaving entity)
+        public async Task<List<Transfer>?> GetTransactionsHistory(Guid accountId)
         {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == id);
+            var account = await _context.Set<AccountSaving>().FindAsync(accountId);
+            if (account == null) return null;
+
+            List<Transfer> transactions = account.TransactionsAsSource
+                .Concat(account.TransactionsAsDestination)
+                .ToList();
+
+            return transactions;
+        }
+
+        public async Task<AccountSaving?> UpdateAsync(Guid accountId, AccountSaving entity)
+        {
+            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId);
 
             if (account == null)
                 return null;
-            entity.AccountName ??= account.AccountName;
-            account.AccountStatus = entity.AccountStatus != 0 ? entity.AccountStatus: account.AccountStatus;
-            /*TODO: Implement an automatic method to update CurrentBalance and AverageBalance */
-         /*   account.CurrentBalance = entity.CurrentBalance != 0 ? entity.CurrentBalance: account.CurrentBalance;
-            account.AverageBalance = entity.AverageBalance != 0 ? entity.AverageBalance: account.AverageBalance;*/
+            if(entity.AccountName != "string")
+            {
+                account.AccountName = entity.AccountName;
+            }
+
+            account.AccountStatus = entity.AccountStatus != 0 ? entity.AccountStatus : account.AccountStatus;
+            await CalculateAndResetInterest(account.Id);
 
             await _context.SaveChangesAsync();
 
@@ -154,40 +213,44 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return account;
         }
 
-        private async Task<decimal?> CalculateMonthlyInterest(Guid id)
+        public async Task CalculateAndResetInterest(Guid accountId)
         {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == id);
-
-            if (account == null)
-                return null;
-
-            decimal monthlyInterest = account.CurrentBalance * account.MonthlyInterestRate;
-
-            return monthlyInterest;
+            if (await HasReachedEndOfMonth(accountId))
+            {
+                AccountSaving? account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId);
+                if (account == null) return;
+                CalculateInterest(accountId);
+                account.MonthlyInterestGenerated = 0;
+            }
         }
-        private async Task<decimal?> CalculateAnnualInterest(Guid id)
+
+        private async void CalculateInterest(Guid accountId)
         {
+            AccountSaving? account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId);
 
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == id);
+            if (account == null) return;
 
-            if (account == null)
-                return null;
-         
-            decimal annualInterest = account.CurrentBalance * account.AnnualInterestRate;
+            decimal monthlyInterestRate = account.AnnualInterestRate / 12;
 
-            return annualInterest;
+            account.MonthlyInterestGenerated = account.CurrentBalance * monthlyInterestRate;
+            account.AnnualInterestProjected += account.MonthlyInterestGenerated * 12;
+        }
+        private async ValueTask<bool> HasReachedEndOfMonth(Guid accountId)
+        {
+            AccountSaving? account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId);
+
+            DateTime currentDate = DateTime.Today;
+            return currentDate.Month != account?.DateOpened.Month || currentDate.Year != account.DateOpened.Year;
         }
 
         private static long GenerateBankAccountNumber()
         {
             Random random = new();
 
-            long minAccountNumber = 10000000000;
-            long maxAccountNumber = 99999999999;
+            long minAccountNumber = 1000000000;
+            long maxAccountNumber = 9999999999;
 
-            long accountNumber = (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
-
-            return accountNumber;
+            return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
         }
 
         private static int GenerateConfirmationNumber()
@@ -212,6 +275,5 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             return confirmationNumber;
         }
-
     }
 }

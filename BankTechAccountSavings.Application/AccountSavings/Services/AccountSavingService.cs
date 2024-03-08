@@ -2,6 +2,9 @@
 using BankTechAccountSavings.Application.AccountSavings.Dtos;
 using BankTechAccountSavings.Application.AccountSavings.Interfaces;
 using AutoMapper;
+using BankTechAccountSavings.Domain.Entities;
+using BankTechAccountSavings.Domain.Enums;
+using BankTechAccountSavings.Application.Transactions.Dtos;
 
 namespace BankTechAccountSavings.Application.AccountSavings.Services
 {
@@ -11,54 +14,81 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
         private readonly IAccountSavingRepository _accountSavingRepository = accountSavingRepository;
         private readonly IMapper _mapper = mapper;
 
-        public Task<CreatedAccountSavingResponse?> AddDepositAsync(int money, Guid id)
+        public async Task<GetTransaction?> AddDepositAsync(int amount, Guid accountId, string description, TransactionType transactionType)
         {
-            throw new NotImplementedException();
+            Transfer? transaction = await _accountSavingRepository.AddDepositAsync(amount,accountId, description, transactionType);
+            return _mapper.Map<GetTransaction>(transaction);
         }
 
-        public Task<CreatedAccountSavingResponse?> CloseAccountSavingAsync(int accountNumber)
+        public async Task<GetTransaction?> WithDrawAsync(int amount, Guid accountId)
         {
-            throw new NotImplementedException();
+            Transfer? transaction = await _accountSavingRepository.WithDrawAsync(amount, accountId);
+            return _mapper.Map<GetTransaction>(transaction);
+        }
+        public async Task<GetTransaction?> TransferFunds(Guid fromAccountId, Guid toAccountId, int transferAmount, TransactionType transactionType)
+        {
+            Transfer? transaction = await _accountSavingRepository.TransferFunds(fromAccountId, toAccountId, transferAmount, transactionType);
+            return _mapper.Map<GetTransaction>(transaction);
         }
 
-        public Task<CreatedAccountSavingResponse?> CreateAccountSavingAsync(CreateAccountSaving createAccountSaving)
+        public async Task<DeletedAccountSavingResponse?> CloseAccountSavingAsync(Guid accountId)
         {
-            throw new NotImplementedException();
+            AccountSaving? accountSaving = await _accountSavingRepository.CloseAccountSavingAsync(accountId);
+            return _mapper.Map<DeletedAccountSavingResponse>(accountSaving);
         }
 
-        public Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid id)
+        public async Task<CreatedAccountSavingResponse?> CreateAccountSavingAsync(CreateAccountSaving createAccountSaving)
         {
-            throw new NotImplementedException();
+            var account = new AccountSaving
+            {
+               ClientId = createAccountSaving.ClientId,
+               CurrentBalance = createAccountSaving.CurrentBalance,
+               Currency = createAccountSaving.Currency,
+            };
+            AccountSaving? newAccount = await _accountSavingRepository.CreateAsync(account);
+            return _mapper.Map<CreatedAccountSavingResponse>(newAccount);
         }
 
-        public Task<GetAccountSaving?> GetAccountSavingByAccountNumberAsync(int accountNumber)
+        public async Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid accountId)
         {
-            throw new NotImplementedException();
+            AccountSaving? accountSaving = await _accountSavingRepository.DeleteAsync(accountId);
+            return _mapper.Map<DeletedAccountSavingResponse>(accountSaving);
         }
 
-        public Task<GetAccountSaving?> GetAccountSavingByIdAsync(Guid id)
+        public async Task<GetAccountSaving?> GetAccountSavingByAccountNumberAsync(long accountNumber)
         {
-            throw new NotImplementedException();
+            AccountSaving? accountSaving = await _accountSavingRepository.GetAccountbyAccountNumber(accountNumber);
+            return _mapper.Map<GetAccountSaving>(accountSaving);
         }
 
-        public Task<List<GetAccountSaving>> GetAllAccountsAsync()
+        public async Task<GetAccountSaving?> GetAccountSavingByIdAsync(Guid accountId)
         {
-            throw new NotImplementedException();
+            AccountSaving? accountSaving = await _accountSavingRepository.GetbyIdAsync(accountId);
+            return _mapper.Map<GetAccountSaving>(accountSaving);
         }
 
-        public Task<UpdatedAccountSavingResponse?> UpdateAccountSavingBalanceAsync(int id, CreateAccountSaving updateAccountSaving)
+        public async Task<List<GetAccountSaving>> GetAllAccountsAsync()
         {
-            throw new NotImplementedException();
+            List<AccountSaving>? accountSaving = await _accountSavingRepository.GetAllAsync();
+            return accountSaving.Select(st => _mapper.Map<GetAccountSaving>(st)).ToList();
         }
 
-        public Task<UpdatedAccountSavingResponse?> UpdateAccountSavingStatusAsync(int id, CreateAccountSaving updateAccountSaving)
+        public async Task<List<GetTransaction>?> GetTransactionsHistory(Guid accountId)
         {
-            throw new NotImplementedException();
+            List<Transfer>? transactions = await _accountSavingRepository.GetTransactionsHistory(accountId);
+            return transactions?.Select(st => _mapper.Map<GetTransaction>(st)).ToList();
         }
 
-        public Task<CreatedAccountSavingResponse?> WithDrawAsync(int accountNumber, int money)
+        public async Task<UpdatedAccountSavingResponse?> UpdateAccountSavingAsync(Guid id, UpdateAccountSaving updateAccountSaving)
         {
-            throw new NotImplementedException();
+
+            var account = new AccountSaving
+            {
+                AccountName = updateAccountSaving.AccountName,
+                AccountStatus = updateAccountSaving.AccountStatus,
+            };
+            var newAccount = await _accountSavingRepository.UpdateAsync(id, account);
+            return _mapper.Map<UpdatedAccountSavingResponse>(newAccount);
         }
     }
 }
