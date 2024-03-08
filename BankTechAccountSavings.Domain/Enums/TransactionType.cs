@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BankTechAccountSavings.Domain.Enums
 {
-    public enum Currency
+    public enum TransactionType
     {
-        DOP = 1,
-        USD
+        LBTR = 1,
+        ACH
     }
 }

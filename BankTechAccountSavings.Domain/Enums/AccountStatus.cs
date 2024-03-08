@@ -8,7 +8,7 @@ namespace BankTechAccountSavings.Domain.Enums
 {
     public enum AccountStatus
     {
-        Active,
+        Active = 1,
         Suspended,
         Closed
     }

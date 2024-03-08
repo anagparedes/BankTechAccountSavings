@@ -9,9 +9,10 @@ namespace BankTechAccountSavings.Domain.Interfaces
     public interface IRepository<T> where T : class
     {
         Task<List<T>> GetAllAsync();
-        Task<T?> GetbyIdAsync(int id);
-        Task<T> AddAsync(T entity);
-        Task<T?> UpdateAsync(int id, T entity);
-        Task<T?> DeleteAsync(int id);
+        Task<T?> GetbyIdAsync(Guid id);
+        Task<T> CreateAsync(T entity);
+        Task<T?> UpdateAsync(Guid id, T entity);
+        Task<T?> DeleteAsync(Guid id);
+
     }
 }

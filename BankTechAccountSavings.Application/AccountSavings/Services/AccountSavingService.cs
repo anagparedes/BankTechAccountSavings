@@ -46,11 +46,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             throw new NotImplementedException();
         }
 
-        public Task<GetAccountSaving?> GetCurrentBalanceAsync(int accountNumber)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<UpdatedAccountSavingResponse?> UpdateAccountSavingBalanceAsync(int id, CreateAccountSaving updateAccountSaving)
         {
             throw new NotImplementedException();

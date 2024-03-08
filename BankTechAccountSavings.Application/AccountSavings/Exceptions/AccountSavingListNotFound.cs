@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankTechAccountSavings.Domain.Enums
+namespace BankTechAccountSavings.Application.AccountSavings.Exceptions
 {
-    public enum Currency
+    public class AccountSavingListNotFound: Exception
     {
-        DOP = 1,
-        USD
+
     }
 }

@@ -12,7 +12,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Interfaces
         Task<List<GetAccountSaving>> GetAllAccountsAsync();
         Task<CreatedAccountSavingResponse?> CreateAccountSavingAsync(CreateAccountSaving createAccountSaving);
         Task<CreatedAccountSavingResponse?> AddDepositAsync(int money, Guid id);
-        Task<GetAccountSaving?> GetCurrentBalanceAsync(int accountNumber);
         Task<CreatedAccountSavingResponse?> WithDrawAsync(int accountNumber, int money);
         Task<CreatedAccountSavingResponse?> CloseAccountSavingAsync(int accountNumber);
         Task<GetAccountSaving?> GetAccountSavingByIdAsync(Guid id);

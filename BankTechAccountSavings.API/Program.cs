@@ -1,6 +1,19 @@
+using BankTechAccountSavings.API.Config;
+using BankTechAccountSavings.Application;
+using BankTechAccountSavings.Infraestructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services
+    .AddApplication()
+    .AddRepositories();
+
+//Add AutoMapper service
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+//Configure connection string
+builder.Services.ConfigDbConnection(builder.Configuration);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
