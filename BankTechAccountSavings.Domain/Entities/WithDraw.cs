@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BankTechAccountSavings.Domain.Entities
+﻿namespace BankTechAccountSavings.Domain.Entities
 {
-    public sealed class WithDraw: Transaction
+    public sealed class Withdraw: Transaction
     {
         public AccountSaving? SourceProduct { get; set; }
         public Guid SourceProductId { get; set; }
+        public decimal Debit { get; set; }
+        public double Tax { get; set; }
+        public double Total { get; set; }
     }
 }

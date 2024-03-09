@@ -1,10 +1,16 @@
 ﻿using BankTechAccountSavings.Domain.Enums;
-using BankTechAccountSavings.Domain.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BankTechAccountSavings.Domain.Entities
+namespace BankTechAccountSavings.Application.Transactions.Dtos
 {
-    public abstract class Transaction: BaseEntity
+    public class GetWithdraw
     {
+        public Guid Id { get; set; }
+        public Guid SourceProductId { get; set; }
         public DateTime TransactionDate { get; set; }
         public int ConfirmationNumber { get; set; }
         public long Voucher { get; set; }

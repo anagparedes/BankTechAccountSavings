@@ -12,7 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services
     .AddApplication()
-    .AddRepositories();
+    .AddRepositories()
+    .AddFluentValidation();
 
 //Add AutoMapper service
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -65,10 +66,10 @@ builder.Services.AddSwaggerGen(c =>
         })
         .ToList<IOpenApiAny>()
     });
-    c.MapType<TransactionType>(() => new OpenApiSchema
+    c.MapType<TransferType>(() => new OpenApiSchema
     {
         Type = "string",
-        Enum = Enum.GetValues(typeof(TransactionType)).Cast<TransactionType>()
+        Enum = Enum.GetValues(typeof(TransferType)).Cast<TransferType>()
         .Select(value =>
         {
             var fieldInfo = value.GetType().GetField(value.ToString());
@@ -76,6 +77,18 @@ builder.Services.AddSwaggerGen(c =>
             return new OpenApiString((attribute?.Name) ?? value.ToString());
         })
         .ToList<IOpenApiAny>()
+    });
+    c.MapType<TransactionType>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Enum = Enum.GetValues(typeof(TransactionType)).Cast<TransactionType>()
+       .Select(value =>
+       {
+           var fieldInfo = value.GetType().GetField(value.ToString());
+           var attribute = fieldInfo?.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+           return new OpenApiString((attribute?.Name) ?? value.ToString());
+       })
+       .ToList<IOpenApiAny>()
     });
 
 });

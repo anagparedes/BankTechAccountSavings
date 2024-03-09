@@ -55,28 +55,22 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<decimal>("Credit")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("Currency")
                         .HasColumnType("int");
 
                     b.Property<decimal>("CurrentBalance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("DateClosed")
+                    b.Property<DateTime>("DateClosed")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateOpened")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Debit")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset?>("DeletedDate")
+                    b.Property<DateTimeOffset>("DeletedDate")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<bool>("IsDeleted")
@@ -91,7 +85,7 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset?>("UpdatedDate")
+                    b.Property<DateTimeOffset>("UpdatedDate")
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
@@ -108,9 +102,6 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Commission")
-                        .HasColumnType("int");
-
                     b.Property<int>("ConfirmationNumber")
                         .HasColumnType("int");
 
@@ -123,26 +114,19 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset?>("DeletedDate")
+                    b.Property<DateTimeOffset>("DeletedDate")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("DestinationProductId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<Guid>("SourceProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("Tax")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Total")
-                        .HasColumnType("float");
 
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
@@ -156,7 +140,7 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset?>("UpdatedDate")
+                    b.Property<DateTimeOffset>("UpdatedDate")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<long>("Voucher")
@@ -164,23 +148,129 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("Transactions");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Transaction");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Deposit", b =>
+                {
+                    b.HasBaseType("BankTechAccountSavings.Domain.Entities.Transaction");
+
+                    b.Property<decimal>("Credit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("DestinationProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("DestinationProductId");
+
+                    b.HasDiscriminator().HasValue("Deposit");
+                });
+
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Transfer", b =>
+                {
+                    b.HasBaseType("BankTechAccountSavings.Domain.Entities.Transaction");
+
+                    b.Property<int>("Commission")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Credit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Debit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("DestinationProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SourceProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Tax")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TransferType")
+                        .HasColumnType("int");
+
                     b.HasIndex("DestinationProductId");
 
                     b.HasIndex("SourceProductId");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", t =>
+                        {
+                            t.Property("Credit")
+                                .HasColumnName("Transfer_Credit");
+
+                            t.Property("DestinationProductId")
+                                .HasColumnName("Transfer_DestinationProductId");
+                        });
+
+                    b.HasDiscriminator().HasValue("Transfer");
                 });
 
-            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Withdraw", b =>
+                {
+                    b.HasBaseType("BankTechAccountSavings.Domain.Entities.Transaction");
+
+                    b.Property<decimal>("Debit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("SourceProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Tax")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("float");
+
+                    b.HasIndex("SourceProductId");
+
+                    b.ToTable("Transactions", t =>
+                        {
+                            t.Property("Debit")
+                                .HasColumnName("Withdraw_Debit");
+
+                            t.Property("SourceProductId")
+                                .HasColumnName("Withdraw_SourceProductId");
+
+                            t.Property("Tax")
+                                .HasColumnName("Withdraw_Tax");
+
+                            t.Property("Total")
+                                .HasColumnName("Withdraw_Total");
+                        });
+
+                    b.HasDiscriminator().HasValue("Withdraw");
+                });
+
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Deposit", b =>
                 {
                     b.HasOne("BankTechAccountSavings.Domain.Entities.AccountSaving", "DestinationProduct")
-                        .WithMany("TransactionsAsDestination")
+                        .WithMany("Deposits")
+                        .HasForeignKey("DestinationProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DestinationProduct");
+                });
+
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Transfer", b =>
+                {
+                    b.HasOne("BankTechAccountSavings.Domain.Entities.AccountSaving", "DestinationProduct")
+                        .WithMany("TransfersAsDestination")
                         .HasForeignKey("DestinationProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BankTechAccountSavings.Domain.Entities.AccountSaving", "SourceProduct")
-                        .WithMany("TransactionsAsSource")
+                        .WithMany("TransfersAsSource")
                         .HasForeignKey("SourceProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -190,11 +280,26 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Navigation("SourceProduct");
                 });
 
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Withdraw", b =>
+                {
+                    b.HasOne("BankTechAccountSavings.Domain.Entities.AccountSaving", "SourceProduct")
+                        .WithMany("WithDraws")
+                        .HasForeignKey("SourceProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SourceProduct");
+                });
+
             modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.AccountSaving", b =>
                 {
-                    b.Navigation("TransactionsAsDestination");
+                    b.Navigation("Deposits");
 
-                    b.Navigation("TransactionsAsSource");
+                    b.Navigation("TransfersAsDestination");
+
+                    b.Navigation("TransfersAsSource");
+
+                    b.Navigation("WithDraws");
                 });
 #pragma warning restore 612, 618
         }

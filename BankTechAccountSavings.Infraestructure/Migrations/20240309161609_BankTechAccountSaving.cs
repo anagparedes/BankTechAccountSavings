@@ -23,21 +23,19 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     CurrentBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MonthlyInterestGenerated = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AnnualInterestProjected = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AnnualInterestRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MonthlyInterestRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<int>(type: "int", nullable: false),
                     DateOpened = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateClosed = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateClosed = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AccountStatus = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                    DeletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,8 +47,6 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SourceProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DestinationProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ConfirmationNumber = table.Column<int>(type: "int", nullable: false),
                     Voucher = table.Column<long>(type: "bigint", nullable: false),
@@ -58,16 +54,28 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     TransactionStatus = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Commission = table.Column<int>(type: "int", nullable: false),
-                    Tax = table.Column<double>(type: "float", nullable: false),
-                    Total = table.Column<double>(type: "float", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
+                    DestinationProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    SourceProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Transfer_DestinationProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TransferType = table.Column<int>(type: "int", nullable: true),
+                    Commission = table.Column<int>(type: "int", nullable: true),
+                    Tax = table.Column<double>(type: "float", nullable: true),
+                    Total = table.Column<double>(type: "float", nullable: true),
+                    Transfer_Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Withdraw_SourceProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Withdraw_Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Withdraw_Tax = table.Column<double>(type: "float", nullable: true),
+                    Withdraw_Total = table.Column<double>(type: "float", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                    DeletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,6 +92,18 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                         principalTable: "AccountSavings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Transactions_AccountSavings_Transfer_DestinationProductId",
+                        column: x => x.Transfer_DestinationProductId,
+                        principalTable: "AccountSavings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Transactions_AccountSavings_Withdraw_SourceProductId",
+                        column: x => x.Withdraw_SourceProductId,
+                        principalTable: "AccountSavings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -95,6 +115,16 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                 name: "IX_Transactions_SourceProductId",
                 table: "Transactions",
                 column: "SourceProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_Transfer_DestinationProductId",
+                table: "Transactions",
+                column: "Transfer_DestinationProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_Withdraw_SourceProductId",
+                table: "Transactions",
+                column: "Withdraw_SourceProductId");
         }
 
         /// <inheritdoc />
