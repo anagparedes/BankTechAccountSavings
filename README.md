@@ -25,7 +25,10 @@ BankTechAccountSavings is a microservice built using .NET Core Web API in .NET 8
 ## Getting Started
 
 1. Clone the repository: `git clone https://github.com/anagparedes/BankTechAccountSavings.git`
-   **Recommendation: Use Visual Studio IDE if you are not familiar with this**
+
+**Recommendation: Use Visual Studio IDE if you are not familiar using Code Editors**
+
+Using your preferred code editor:
 
 2. On the Terminal, navigate to the project folder:
 
