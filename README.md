@@ -210,3 +210,5 @@ This project uses **User Secrets** to securely store sensitive information such 
  ```bash
 "Server=YOUR_SERVER;Database=BanktechAccountSavings;Trusted_Connection=True;TrustServerCertificate=True;"
   ```
+
+Make sure to replace YOUR_SERVER with the name of your SQL Server instance.
