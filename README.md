@@ -204,3 +204,9 @@ This project uses **User Secrets** to securely store sensitive information such 
 
    ```bash
    dotnet user-secrets set "ConnectionStrings:DefaultConnection" "your_connection_string_here"
+
+**Example of a connection string:**
+
+ ```bash
+"Server=YOUR_SERVER;Database=BanktechAccountSavings;Trusted_Connection=True;TrustServerCertificate=True;"
+  ```
