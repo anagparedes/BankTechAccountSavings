@@ -6,6 +6,7 @@ BankTechAccountSavings is a microservice built using .NET Core Web API in .NET 8
 
 1. [Requirements](#Requirements)
 1. [Getting Started](#getting-started)
+1. [Creating The Database With Entity Framework](#creating-the-database-with-entity-framework)
 1. [Project Structure](#project-structure)
 1. [API Documentation](#api-documentation)
 1. [Sensitive Information](#sensitive-information)
@@ -55,6 +56,39 @@ On your terminal should prompt this message:
   Now the Application is running successfully, and it's listening on `http://localhost:5085`.
 
 You should be able to access the Swagger documentation by navigating to the Swagger endpoint. In this case, try opening your web browser and visiting `http://localhost:5085/swagger/index.html`.
+
+## Creating The Database With Entity Framework
+**Important: Since the project uses Entity Framework Core, it should be compatible with various database systems supported by EF Core, such as SQL Server, PostgreSQL, or SQLite. Feel free to use whichever database system you are most comfortable with.**
+
+First you need to create a Database:
+
+To create the database using SQL Server, follow these steps:
+
+1. Make sure you have SQL Server installed on your machine.
+
+2. Open a terminal or command prompt and navigate to the project directory.
+
+3. Run the following command to add the SQL Server provider to your project:
+
+   ```bash
+   dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+The project already includes an initial migration named `BanktechAccountSaving` in the `Migrations` folder inside the `BankTechAccountSavings.Infraestructure` project.
+
+To create the database using this existing migration, follow these steps:
+
+1. Open a terminal or command prompt and navigate to the project directory.
+
+2. Run the following command to apply the `BanktechAccountSaving` migration and create the database:
+
+   ```bash
+   dotnet ef database update BanktechAccountSaving --project BankTechAccountSavings.Infraestructure
+   ```
+
+After running this command, the database should be created and ready to use with the BankTechAccountSavings application
+
+**Note: Make sure that you have set up the correct database connection using User Secrets before running the migration. You can see the documentation here: [Sensitive Information](#sensitive-information)**
+
 
 ## Project Structure
 
