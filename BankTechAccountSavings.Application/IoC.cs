@@ -32,6 +32,9 @@ namespace BankTechAccountSavings.Application
             services.AddScoped<IValidator<CreateDeposit>, CreateDepositValidator>();
             services.AddScoped<IValidator<CreateWithdraw>, CreateWithdrawValidator>();
             services.AddScoped<IValidator<CreateTransfer>, CreateTransferValidator>();
+            services.AddScoped<IValidator<CreateDepositByAccountNumber>, CreateDepositByAccountNumberValidator>();
+            services.AddScoped<IValidator<CreateWithdrawByAccountNumber>, CreateWithdrawByAccountNumberValidator>();
+            services.AddScoped<IValidator<CreateTransferByAccountNumber>, CreateTransferByAccountNumberValidator>();
 
             return services;
         }

@@ -4,6 +4,7 @@
     {
         public AccountSaving? SourceProduct { get; set; }
         public Guid SourceProductId { get; set; }
+        public long SourceProductNumber { get; set; }
         public decimal Debit { get; set; }
         public decimal Tax { get; set; }
         public decimal Total { get; set;  }

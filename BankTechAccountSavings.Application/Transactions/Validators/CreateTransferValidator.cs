@@ -15,8 +15,7 @@ namespace BankTechAccountSavings.Application.Transactions.Validators
             .NotEqual(transfer => transfer.SourceProductId)
                 .WithMessage("Source product and destination product must be different.");
 
-
-            RuleFor(transfer => transfer.TransactionType)
+            RuleFor(transfer => transfer.TransferType)
                 .IsInEnum().WithMessage("Invalid transaction type.");
 
             RuleFor(transfer => transfer.Amount)

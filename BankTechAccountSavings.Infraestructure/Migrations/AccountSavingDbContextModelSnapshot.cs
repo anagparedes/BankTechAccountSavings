@@ -165,6 +165,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<Guid>("DestinationProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<long>("DestinationProductNumber")
+                        .HasColumnType("bigint");
+
                     b.HasIndex("DestinationProductId");
 
                     b.HasDiscriminator().HasValue("Deposit");
@@ -186,8 +189,14 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<Guid>("DestinationProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<long>("DestinationProductNumber")
+                        .HasColumnType("bigint");
+
                     b.Property<Guid>("SourceProductId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("SourceProductNumber")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("Tax")
                         .HasColumnType("decimal(18,2)");
@@ -209,6 +218,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                             t.Property("DestinationProductId")
                                 .HasColumnName("Transfer_DestinationProductId");
+
+                            t.Property("DestinationProductNumber")
+                                .HasColumnName("Transfer_DestinationProductNumber");
                         });
 
                     b.HasDiscriminator().HasValue("Transfer");
@@ -223,6 +235,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                     b.Property<Guid>("SourceProductId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("SourceProductNumber")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("Tax")
                         .HasColumnType("decimal(18,2)");
@@ -239,6 +254,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                             t.Property("SourceProductId")
                                 .HasColumnName("Withdraw_SourceProductId");
+
+                            t.Property("SourceProductNumber")
+                                .HasColumnName("Withdraw_SourceProductNumber");
 
                             t.Property("Tax")
                                 .HasColumnName("Withdraw_Tax");

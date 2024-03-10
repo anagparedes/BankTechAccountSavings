@@ -3,6 +3,7 @@ using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Domain.Interfaces;
 using BankTechAccountSavings.Infraestructure.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {
@@ -47,6 +48,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             {
                 DestinationProduct = account,
                 DestinationProductId = account.Id,
+                DestinationProductNumber = account.AccountNumber,
                 Credit = amount,
                 TransactionDate = DateTime.UtcNow.Date,
                 ConfirmationNumber = GenerateConfirmationNumber(),
@@ -80,6 +82,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             {
                 SourceProduct = account,
                 SourceProductId = account.Id,
+                SourceProductNumber = account.AccountNumber,
                 Debit = amount,
                 Amount = amount,
                 TransactionDate = DateTime.UtcNow.Date,
@@ -119,8 +122,10 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             {
                 SourceProduct = fromAccount,
                 SourceProductId = fromAccount.Id,
+                SourceProductNumber = fromAccount.AccountNumber,
                 DestinationProduct = toAccount,
                 DestinationProductId = toAccount.Id,
+                DestinationProductNumber = toAccount.AccountNumber,
                 TransferType = transferType,
                 TransactionType = TransactionType.Transfer,
                 Description = description,
@@ -335,5 +340,157 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         .OrderByDescending(t => t.TransactionDate);
         }
 
+        public IQueryable<Transaction> GetTransactionsByAccountNumberQueryable(long accountNumber)
+        {
+            return _context.Transactions.Where(t =>
+            (t is Deposit && ((Deposit)t).DestinationProductNumber == accountNumber) ||
+            (t is Transfer && (((Transfer)t).SourceProductNumber == accountNumber ||
+            ((Transfer)t).DestinationProductNumber == accountNumber)) ||
+            (t is Withdraw && ((Withdraw)t).SourceProductNumber == accountNumber)
+           )
+        .OrderByDescending(t => t.TransactionDate);
+        }
+
+        public async Task<Transfer?> TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType, CancellationToken cancellationToken = default)
+        {
+            AccountSaving? fromAccount = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == fromAccountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {fromAccountNumber} not found");
+            AccountSaving? toAccount = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == toAccountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {toAccountNumber} not found");
+
+            if (fromAccount == null || toAccount == null)
+            {
+                throw new InvalidOperationException("Account not found");
+            }
+
+            if (transferAmount <= 0 || transferAmount > fromAccount.CurrentBalance)
+            {
+                throw new InvalidOperationException("Invalid transfer amount or insufficient funds");
+            }
+
+            int commission = (transferType == TransferType.LBTR) ? 100 : 0;
+
+            Transfer newTransfer = new()
+            {
+                SourceProduct = fromAccount,
+                SourceProductId = fromAccount.Id,
+                SourceProductNumber = fromAccount.AccountNumber,
+                DestinationProduct = toAccount,
+                DestinationProductId = toAccount.Id,
+                DestinationProductNumber = toAccount.AccountNumber,
+                TransferType = transferType,
+                TransactionType = TransactionType.Transfer,
+                Description = description,
+                TransactionDate = DateTime.Today,
+                ConfirmationNumber = GenerateConfirmationNumber(),
+                Voucher = GenerateVoucherNumber(),
+                TransactionStatus = TransactionStatus.Completed,
+                Amount = transferAmount,
+                Commission = commission,
+                Tax = (decimal)(0.0015 * transferAmount),
+                Total = (decimal)(transferAmount + 100 + (0.0015 * transferAmount)),
+                Credit = transferAmount,
+                Debit = transferAmount
+            };
+
+            fromAccount.CurrentBalance -= (decimal)newTransfer.Total;
+            toAccount.CurrentBalance += transferAmount;
+
+            fromAccount.TransfersAsSource.Add(newTransfer);
+            toAccount.TransfersAsDestination.Add(newTransfer);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return newTransfer;
+        }
+
+        public async Task<Deposit?> AddDepositByAccountNumberAsync(int amount, long accountNumber, string description, CancellationToken cancellationToken = default)
+        {
+            var account = await _context.AccountSavings.FirstOrDefaultAsync(s => s.AccountNumber == accountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountNumber} not found");
+            if (account == null) return null;
+            if (amount <= 0)
+            {
+                throw new InvalidOperationException("Invalid Deposit Amount");
+            }
+            account.CurrentBalance += amount;
+
+            Deposit newDeposit = new()
+            {
+                DestinationProduct = account,
+                DestinationProductId = account.Id,
+                DestinationProductNumber = account.AccountNumber,
+                Credit = amount,
+                TransactionDate = DateTime.UtcNow.Date,
+                ConfirmationNumber = GenerateConfirmationNumber(),
+                Voucher = GenerateVoucherNumber(),
+                Description = description,
+                TransactionType = TransactionType.Deposit,
+                TransactionStatus = TransactionStatus.Completed,
+                Amount = amount,
+            };
+            account.Deposits.Add(newDeposit);
+            await _context.Set<Deposit>().AddAsync(newDeposit, cancellationToken);
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return account.Deposits.LastOrDefault();
+        }
+
+        public async Task<Withdraw?> WithDrawByAccountNumberAsync(int amount, long accountNumber, CancellationToken cancellationToken = default)
+        {
+            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == accountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountNumber} not found");
+            if (account == null) return null;
+            if (account.CurrentBalance < amount)
+            {
+                throw new InvalidOperationException("Insufficient Funds");
+            }
+            else if (amount <= 0)
+            {
+                throw new InvalidOperationException("Invalid withdraw amount");
+            }
+
+            Withdraw newWithdraw = new()
+            {
+                SourceProduct = account,
+                SourceProductId = account.Id,
+                SourceProductNumber = account.AccountNumber,
+                Debit = amount,
+                Amount = amount,
+                TransactionDate = DateTime.UtcNow.Date,
+                ConfirmationNumber = GenerateConfirmationNumber(),
+                Voucher = GenerateVoucherNumber(),
+                Description = $"Withdraw on day: {DateTime.UtcNow.Date}",
+                TransactionType = TransactionType.WithDraw,
+                TransactionStatus = TransactionStatus.Completed,
+                Tax = (decimal)(0.0015 * amount),
+                Total = (decimal)(amount + 100 + (0.0015 * amount))
+            };
+            account.CurrentBalance -= (decimal)newWithdraw.Total;
+            await _context.Set<Withdraw>().AddAsync(newWithdraw, cancellationToken);
+            account.WithDraws.Add(newWithdraw);
+            await _context.SaveChangesAsync(cancellationToken);
+            return account.WithDraws.LastOrDefault();
+        }
+
+        public async Task<List<Transaction>?> GetTransactionsHistoryByAccountNumber(long accountNumber, CancellationToken cancellationToken = default)
+        {
+            List<Transaction> transactions = await _context.Set<Transaction>()
+           .Where(t =>
+            (t is Deposit && ((Deposit)t).DestinationProductNumber == accountNumber) ||
+           (t is Transfer && (((Transfer)t).SourceProductNumber == accountNumber || ((Transfer)t).DestinationProductNumber == accountNumber)) ||
+           (t is Withdraw && ((Withdraw)t).SourceProductNumber == accountNumber)
+           )
+        .OrderByDescending(t => t.TransactionDate)
+        .ToListAsync(cancellationToken);
+
+            if (transactions == null || transactions.Count == 0)
+            {
+                throw new InvalidOperationException($"No transactions found for the account with number {accountNumber}.");
+            }
+
+            return transactions;
+        }
+
+        public Task<Paginated<Transaction>> GetTransactionsPaginatedByAccountNumberAsync(IQueryable<Transaction> queryable, long accountNumber, int page, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

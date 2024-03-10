@@ -4,6 +4,7 @@
     {
         public AccountSaving? DestinationProduct { get; set; }
         public Guid DestinationProductId { get; set; }
+        public long DestinationProductNumber { get; set; }
         public decimal Credit { get; set;  }
     }
 }
