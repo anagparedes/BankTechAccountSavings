@@ -189,11 +189,11 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<Guid>("SourceProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Tax")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<double>("Total")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TransferType")
                         .HasColumnType("int");
@@ -224,11 +224,11 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<Guid>("SourceProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Tax")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<double>("Total")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasIndex("SourceProductId");
 

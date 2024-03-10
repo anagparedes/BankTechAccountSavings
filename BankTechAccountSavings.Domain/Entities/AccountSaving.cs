@@ -3,7 +3,7 @@ using BankTechAccountSavings.Domain.Models;
 
 namespace BankTechAccountSavings.Domain.Entities
 {
-    public sealed class AccountSaving: BaseEntity
+    internal sealed class AccountSaving: BaseEntity
     {
         public int ClientId { get; set; }
         public long AccountNumber { get; set; }

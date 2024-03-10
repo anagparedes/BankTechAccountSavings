@@ -6,13 +6,13 @@ namespace BankTechAccountSavings.Infraestructure.Context
 {
     public interface IAccountSavingDbContext : IDbContext { }
 
-    public class AccountSavingDbContext(DbContextOptions<AccountSavingDbContext> options) : BaseDbContext(options), IAccountSavingDbContext
+    internal class AccountSavingDbContext(DbContextOptions<AccountSavingDbContext> options) : BaseDbContext(options), IAccountSavingDbContext
     {
-        public DbSet<AccountSaving> AccountSavings { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Deposit> Deposits { get; set; }
-        public DbSet<Withdraw> Withdraws { get; set; }
-        public DbSet<Transfer> Transfers { get; set; }
+        internal DbSet<AccountSaving> AccountSavings { get; set; }
+        internal DbSet<Transaction> Transactions { get; set; }
+        internal DbSet<Deposit> Deposits { get; set; }
+        internal DbSet<Withdraw> Withdraws { get; set; }
+        internal DbSet<Transfer> Transfers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

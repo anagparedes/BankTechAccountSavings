@@ -14,7 +14,7 @@ namespace BankTechAccountSavings.Application.Transactions.Dtos
         public TransferType TransactionType { get; set; }
         public decimal Amount { get; set; }
         public int Commission { get; set; }
-        public double Tax { get; set; }
-        public double Total { get; set; }
+        public decimal Tax { get; set; }
+        public decimal Total { get; set; }
     }
 }

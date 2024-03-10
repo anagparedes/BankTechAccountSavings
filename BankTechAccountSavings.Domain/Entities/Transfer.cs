@@ -2,7 +2,7 @@
 
 namespace BankTechAccountSavings.Domain.Entities
 {
-    public sealed class Transfer: Transaction
+    internal sealed class Transfer: Transaction
     {
         public AccountSaving? SourceProduct { get; set; }
         public AccountSaving? DestinationProduct { get; set; }
@@ -10,9 +10,9 @@ namespace BankTechAccountSavings.Domain.Entities
         public Guid DestinationProductId { get; set; }
         public TransferType TransferType { get; set; }
         public int Commission { get; set; }
-        public double Tax { get; set; }
-        public double Total { get; set; }
+        public decimal Tax { get; set; }
+        public decimal Total { get; set; }
         public decimal Credit { get; set; }
-        public decimal Debit { get; set; }
+        public decimal Debit { get; set;  }
     }
 }

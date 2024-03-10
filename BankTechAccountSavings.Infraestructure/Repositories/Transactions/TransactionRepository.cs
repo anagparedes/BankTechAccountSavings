@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.Transactions
 {
-    public class TransactionRepository(AccountSavingDbContext context) : ITransactionRepository
+    internal class TransactionRepository(AccountSavingDbContext context) : ITransactionRepository
     {
         private readonly AccountSavingDbContext _context = context;
 

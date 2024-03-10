@@ -135,11 +135,11 @@ namespace BankTechAccountSavings.API.Controllers
         }
 
         [HttpGet("transfer/account/{accountId:guid}")]
-        public async Task<ActionResult<GetTransfer>?> GetAccountTransfers(Guid accountId)
+        public async Task<ActionResult<List<GetTransfer>>?> GetAccountTransfers(Guid accountId)
         {
             try
             {
-                GetTransfer? transaction = await _transactionService.GetTransferbyId(accountId);
+                List<GetTransfer>? transaction = await _transactionService.GetAllTransfersByAccount(accountId);
 
                 if (transaction == null)
                 {
@@ -341,11 +341,11 @@ namespace BankTechAccountSavings.API.Controllers
         }
 
         [HttpGet("withdraw/account/{accountId:guid}")]
-        public async Task<ActionResult<GetWithdraw>?> GetAccountWithdraws(Guid accountId)
+        public async Task<ActionResult<List<GetWithdraw>>?> GetAccountWithdraws(Guid accountId)
         {
             try
             {
-                GetWithdraw? transaction = await _transactionService.GetWithdrawbyId(accountId);
+                List<GetWithdraw>? transaction = await _transactionService.GetAllWithdrawsByAccount(accountId);
 
                 if (transaction == null)
                 {

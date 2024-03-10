@@ -6,7 +6,7 @@ using BankTechAccountSavings.Domain.Interfaces;
 
 namespace BankTechAccountSavings.Application.Transactions.Services
 {
-    public class TransactionService(ITransactionRepository transactionRepository, IMapper mapper) : ITransactionService
+    internal class TransactionService(ITransactionRepository transactionRepository, IMapper mapper) : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository = transactionRepository;
         private readonly IMapper _mapper = mapper;

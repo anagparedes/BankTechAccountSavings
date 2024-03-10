@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace BankTechAccountSavings.Infraestructure.Context
 {
-    public abstract class BaseDbContext: DbContext, IDbContext
+    internal abstract class BaseDbContext: DbContext, IDbContext
     {
         protected BaseDbContext(DbContextOptions options) : base(options)
         {

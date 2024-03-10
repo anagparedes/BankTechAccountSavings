@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {
-    public class AccountSavingRepository(AccountSavingDbContext context) : IAccountSavingRepository
+    internal class AccountSavingRepository(AccountSavingDbContext context) : IAccountSavingRepository
     {
         private readonly AccountSavingDbContext _context = context;
 
@@ -85,11 +85,11 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 TransactionDate = DateTime.UtcNow.Date,
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
-                Description = $"Retiro el día:{DateTime.UtcNow.Date}",
+                Description = $"Withdraw on day: {DateTime.UtcNow.Date}",
                 TransactionType = TransactionType.WithDraw,
                 TransactionStatus = TransactionStatus.Completed,
-                Tax = (0.0015 * amount),
-                Total = (amount + 100 + (0.0015 * amount))
+                Tax = (decimal)(0.0015 * amount),
+                Total = (decimal)(amount + 100 + (0.0015 * amount))
             };
             account.CurrentBalance -= (decimal)newWithdraw.Total;
             await _context.Set<Withdraw>().AddAsync(newWithdraw, cancellationToken);
@@ -130,8 +130,8 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 TransactionStatus = TransactionStatus.Completed,
                 Amount = transferAmount,
                 Commission = commission,
-                Tax = 0.0015 * transferAmount,
-                Total = transferAmount + 100 + (0.0015 * transferAmount),
+                Tax = (decimal)(0.0015 * transferAmount),
+                Total = (decimal)(transferAmount + 100 + (0.0015 * transferAmount)),
                 Credit = transferAmount,
                 Debit = transferAmount
             };
@@ -323,7 +323,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         {
             return _context.Set<AccountSaving>();
         }
-  
+
         public IQueryable<Transaction> GetTransactionsByAccountQueryable(Guid accountId)
         {
             return _context.Transactions.Where(t =>

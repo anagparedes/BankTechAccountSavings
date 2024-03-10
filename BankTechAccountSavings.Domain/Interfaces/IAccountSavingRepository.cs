@@ -3,7 +3,7 @@ using BankTechAccountSavings.Domain.Enums;
 
 namespace BankTechAccountSavings.Domain.Interfaces
 {
-    public interface IAccountSavingRepository: IRepository<AccountSaving>
+    internal interface IAccountSavingRepository: IRepository<AccountSaving>
     {
         Task<AccountSaving?> GetAccountbyAccountNumber(long accountNumber, CancellationToken cancellationToken = default);
         Task<List<Transaction>?> GetTransactionsHistory(Guid accountId, CancellationToken cancellationToken = default);
@@ -14,7 +14,5 @@ namespace BankTechAccountSavings.Domain.Interfaces
         IQueryable<AccountSaving> GetAllQueryable();
         IQueryable<Transaction> GetTransactionsByAccountQueryable(Guid accountId);
         Task<Paginated<Transaction>> GetTransactionsPaginatedAsync(IQueryable<Transaction> queryable, int page, int pageSize);
-
-
     }
 }

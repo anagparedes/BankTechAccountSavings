@@ -8,7 +8,7 @@ using BankTechAccountSavings.Application.Transactions.Dtos;
 
 namespace BankTechAccountSavings.Application.AccountSavings.Services
 {
-    public class AccountSavingService(IAccountSavingRepository accountSavingRepository, IMapper mapper) : IAccountSavingService
+    internal class AccountSavingService(IAccountSavingRepository accountSavingRepository, IMapper mapper) : IAccountSavingService
 
     {
         private readonly IAccountSavingRepository _accountSavingRepository = accountSavingRepository;

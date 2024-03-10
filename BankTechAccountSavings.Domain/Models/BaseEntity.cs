@@ -2,7 +2,7 @@
 
 namespace BankTechAccountSavings.Domain.Models
 {
-    public abstract class BaseEntity: IBaseEntity
+    internal abstract class BaseEntity: IBaseEntity
     {
         public Guid Id { get; set; }
         public bool IsDeleted { get; set; }
