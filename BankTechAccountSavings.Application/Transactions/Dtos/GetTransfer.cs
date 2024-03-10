@@ -1,5 +1,4 @@
-﻿using BankTechAccountSavings.Domain.Entities;
-using BankTechAccountSavings.Domain.Enums;
+﻿using BankTechAccountSavings.Domain.Enums;
 
 namespace BankTechAccountSavings.Application.Transactions.Dtos
 {

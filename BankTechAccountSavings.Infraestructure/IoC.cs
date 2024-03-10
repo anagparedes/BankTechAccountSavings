@@ -13,6 +13,5 @@ namespace BankTechAccountSavings.Infraestructure
                 .AddScoped<IAccountSavingRepository, AccountSavingRepository>()
                 .AddScoped<ITransactionRepository, TransactionRepository>();
         }
-
     }
 }

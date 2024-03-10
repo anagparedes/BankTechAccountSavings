@@ -1,5 +1,4 @@
 ﻿using BankTechAccountSavings.Domain.Entities;
-using System.Linq;
 
 namespace BankTechAccountSavings.Domain.Interfaces
 {

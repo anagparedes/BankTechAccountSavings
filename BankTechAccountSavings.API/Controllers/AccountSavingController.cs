@@ -1,14 +1,9 @@
 ﻿using BankTechAccountSavings.Application.AccountSavings.Dtos;
 using BankTechAccountSavings.Application.AccountSavings.Interfaces;
 using BankTechAccountSavings.Application.Transactions.Dtos;
-using BankTechAccountSavings.Application.Transactions.Validators;
 using BankTechAccountSavings.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.Identity.Client;
-using BankTechAccountSavings.Application.AccountSavings.Services;
 using BankTechAccountSavings.Domain.Entities;
 
 namespace BankTechAccountSavings.API.Controllers

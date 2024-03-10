@@ -1,5 +1,4 @@
-﻿
-namespace BankTechAccountSavings.Domain.Interfaces
+﻿namespace BankTechAccountSavings.Domain.Interfaces
 {
     public interface IBaseEntity
     {

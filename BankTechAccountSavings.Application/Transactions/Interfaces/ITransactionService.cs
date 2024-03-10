@@ -1,5 +1,4 @@
-﻿using BankTechAccountSavings.Application.AccountSavings.Dtos;
-using BankTechAccountSavings.Application.Transactions.Dtos;
+﻿using BankTechAccountSavings.Application.Transactions.Dtos;
 using BankTechAccountSavings.Domain.Entities;
 
 namespace BankTechAccountSavings.Application.Transactions.Interfaces

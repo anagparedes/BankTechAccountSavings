@@ -1,15 +1,8 @@
-﻿using BankTechAccountSavings.Application.Transactions.Dtos;
-using BankTechAccountSavings.Domain.Entities;
+﻿using BankTechAccountSavings.Domain.Entities;
 using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Domain.Interfaces;
 using BankTechAccountSavings.Infraestructure.Context;
-using BankTechAccountSavings.Infraestructure.Repositories.Transactions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {

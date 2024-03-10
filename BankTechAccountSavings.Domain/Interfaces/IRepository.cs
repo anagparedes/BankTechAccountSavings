@@ -1,5 +1,4 @@
-﻿
-using BankTechAccountSavings.Domain.Entities;
+﻿using BankTechAccountSavings.Domain.Entities;
 
 namespace BankTechAccountSavings.Domain.Interfaces
 {
