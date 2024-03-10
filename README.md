@@ -44,6 +44,11 @@ BankTechAccountSavings is a microservice built using .NET Core Web API in .NET 8
     ```bash
     dotnet run --project BankTechAccountSavings.API
     ```
+5. It Will Prompt on terminal this message:
+     ![image](https://github.com/anagparedes/BankTechAccountSavings/assets/49009311/1533b6f5-25db-4f08-9c37-c1469e6e4acc)
+ Now the Application is running successfully, and it's listening on `http://localhost:5085`.
+
+6. You should be able to access the Swagger documentation by navigating to the Swagger endpoint. In this case, try opening your web browser and visiting `http://localhost:5085/swagger/index.html`.
 
 ## Project Structure
 
