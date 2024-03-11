@@ -19,11 +19,10 @@ namespace BankTechAccountSavings.Application.AccountSavings.Interfaces
         Task<GetTransferByAccountNumber?> TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType);
         Task<List<GetTransaction>?> GetTransactionsHistory(Guid accountId);
         Task<List<GetTransaction>?> GetTransactionsHistoryByAccountNumber(long accountNumber);
-        Task<DeletedAccountSavingResponse?> CloseAccountSavingAsync(Guid accountId);
         Task<GetAccountSaving?> GetAccountSavingByIdAsync(Guid accountId);
         Task<GetAccountSaving?> GetAccountSavingByAccountNumberAsync(long accountNumber);
         Task<UpdatedAccountSavingResponse?> UpdateAccountSavingAsync(Guid accountId, UpdateAccountSaving updateAccountSaving);
-        Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid accountId);
+        Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid accountId, string reasonToCloseAccount);
         string FormatErrorResponse(string errorMessage);
     }
 }

@@ -137,12 +137,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return transactions?.Select(st => _mapper.Map<GetTransaction>(st)).ToList();
         }
 
-        async Task<DeletedAccountSavingResponse?> IAccountSavingService.CloseAccountSavingAsync(Guid accountId)
-        {
-            AccountSaving? accountSaving = await _accountSavingRepository.CloseAccountSavingAsync(accountId);
-            return _mapper.Map<DeletedAccountSavingResponse>(accountSaving);
-        }
-
         async Task<GetAccountSaving?> IAccountSavingService.GetAccountSavingByIdAsync(Guid accountId)
         {
             AccountSaving? accountSaving = await _accountSavingRepository.GetbyIdAsync(accountId);
@@ -166,9 +160,9 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return _mapper.Map<UpdatedAccountSavingResponse>(newAccount);
         }
 
-        async Task<DeletedAccountSavingResponse?> IAccountSavingService.DeleteAccountSavingAsync(Guid accountId)
+        async Task<DeletedAccountSavingResponse?> IAccountSavingService.DeleteAccountSavingAsync(Guid accountId, string reasonToCloseAccount)
         {
-            AccountSaving? accountSaving = await _accountSavingRepository.DeleteAsync(accountId);
+            AccountSaving? accountSaving = await _accountSavingRepository.DeleteAsync(accountId, reasonToCloseAccount);
             return _mapper.Map<DeletedAccountSavingResponse>(accountSaving);
         }
 

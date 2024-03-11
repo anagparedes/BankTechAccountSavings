@@ -433,39 +433,18 @@ namespace BankTechAccountSavings.API.Controllers
         }
 
         [HttpPatch("{accountId:Guid}/close")]
-        public async Task<ActionResult<DeletedAccountSavingResponse>?> CloseAccount(Guid accountId)
+        public async Task<ActionResult<DeletedAccountSavingResponse>?> CloseAccount(Guid accountId, string reasonToCloseAccount)
         {
             try
             {
-                DeletedAccountSavingResponse? account = await _accountService.CloseAccountSavingAsync(accountId);
+                DeletedAccountSavingResponse? account = await _accountService.DeleteAccountSavingAsync(accountId, reasonToCloseAccount);
 
                 if (account == null)
                 {
-                    return NotFound(_accountService.FormatErrorResponse("Failed to closed the account"));
+                    return NotFound(_accountService.FormatErrorResponse("Failed to close the account"));
                 }
 
                 return Ok("Account is closed");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-
-        }
-
-        [HttpDelete("{accountId:Guid}")]
-        public async Task<ActionResult<DeletedAccountSavingResponse>?> DeleteAccount(Guid accountId)
-        {
-            try
-            {
-                DeletedAccountSavingResponse? account = await _accountService.DeleteAccountSavingAsync(accountId);
-
-                if (account == null)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("Failed to delete the account"));
-                }
-
-                return Ok(account);
             }
             catch (Exception ex)
             {
