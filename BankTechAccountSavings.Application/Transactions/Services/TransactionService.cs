@@ -199,5 +199,10 @@ namespace BankTechAccountSavings.Application.Transactions.Services
                 CurrentPage = page
             };
         }
+
+        public string FormatErrorResponse(string errorMessage)
+        {
+            return $"\"errorMessage\": \"{errorMessage}\"";
+        }
     }
 }

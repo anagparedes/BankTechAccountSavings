@@ -5,7 +5,6 @@ using BankTechAccountSavings.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
 using BankTechAccountSavings.Domain.Entities;
-using Microsoft.Identity.Client;
 
 namespace BankTechAccountSavings.API.Controllers
 {
@@ -32,7 +31,7 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (accountSavings == null || accountSavings.Count == 0)
                 {
-                    return NotFound("No Accounts were found");
+                    return NotFound(_accountService.FormatErrorResponse("No Accounts were found"));
                 }
 
                 return Ok(accountSavings);
@@ -40,9 +39,8 @@ namespace BankTechAccountSavings.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
-
         }
 
         [HttpGet("paginated")]
@@ -54,14 +52,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (paginatedResult.Items == null)
                 {
-                    return NotFound("No Accounts were found");
+                    return NotFound(_accountService.FormatErrorResponse("No Accounts were found"));
                 }
 
                 return Ok(paginatedResult);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
         }
 
@@ -74,14 +72,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (paginatedResult.Items == null)
                 {
-                    return NotFound($"No Transactions were found for the account {accountId}");
+                    return NotFound(_accountService.FormatErrorResponse($"No Transactions were found for the account {accountId}"));
                 }
 
                 return Ok(paginatedResult);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
         }
 
@@ -94,37 +92,35 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (paginatedResult.Items == null)
                 {
-                    return NotFound($"No Transactions were found for the account {accountNumber}");
+                    return NotFound(_accountService.FormatErrorResponse($"No Transactions were found for the account {accountNumber}"));
                 }
 
                 return Ok(paginatedResult);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
         }
 
         [HttpGet("{accountId:Guid}")]
         public async Task<ActionResult<GetAccountSaving>> GetAccountById(Guid accountId)
         {
-
             try
             {
                 GetAccountSaving? account = await _accountService.GetAccountSavingByIdAsync(accountId);
 
                 if (account == null)
                 {
-                    return NotFound("No Account found.");
+                    return NotFound(_accountService.FormatErrorResponse("No Account found"));
                 }
 
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
-
         }
 
         [HttpGet("account-number/{accountNumber:long}")]
@@ -136,14 +132,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (account == null)
                 {
-                    return NotFound("No Account found.");
+                    return NotFound(_accountService.FormatErrorResponse("No Account found"));
                 }
 
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -157,16 +153,15 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (transactions == null || transactions.Count == 0)
                 {
-                    return NotFound("No Transactions found.");
+                    return NotFound(_accountService.FormatErrorResponse("No Transactions found"));
                 }
 
                 return Ok(transactions);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
-
         }
 
         [HttpGet("{accountNumber:long}/transactions")]
@@ -178,16 +173,15 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (transactions == null || transactions.Count == 0)
                 {
-                    return NotFound("No Transactions found.");
+                    return NotFound(_accountService.FormatErrorResponse("No Transactions found"));
                 }
 
                 return Ok(transactions);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
-
         }
 
 
@@ -211,14 +205,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (deposit == null)
                 {
-                    return NotFound("Deposit failed.");
+                    return NotFound(_accountService.FormatErrorResponse("Deposit failed"));
                 }
 
                 return Ok(deposit);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -243,16 +237,15 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (deposit == null)
                 {
-                    return NotFound("Deposit failed.");
+                    return NotFound(_accountService.FormatErrorResponse("Deposit failed"));
                 }
 
                 return Ok(deposit);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
-
         }
 
         [HttpPost("{accountId:Guid}/withdraw")]
@@ -274,14 +267,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (withdraw == null)
                 {
-                    return NotFound("WithDraw failed.");
+                    return NotFound(_accountService.FormatErrorResponse("WithDraw failed"));
                 }
 
                 return Ok(withdraw);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -305,16 +298,15 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (withdraw == null)
                 {
-                    return NotFound("WithDraw failed.");
+                    return NotFound(_accountService.FormatErrorResponse("WithDraw failed"));
                 }
 
                 return Ok(withdraw);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
-
         }
 
         [HttpPost("{fromAccountId:Guid}/transfer/{toAccountId:Guid}")]
@@ -340,14 +332,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (transaction == null)
                 {
-                    return NotFound("Transaction failed.");
+                    return NotFound(_accountService.FormatErrorResponse("Transaction failed"));
                 }
 
                 return Ok(transaction);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -402,14 +394,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (account == null)
                 {
-                    return NotFound("Failed to create the account.");
+                    return NotFound(_accountService.FormatErrorResponse("Failed to create the account"));
                 }
 
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -428,14 +420,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (account == null)
                 {
-                    return NotFound("Failed to update the account.");
+                    return NotFound(_accountService.FormatErrorResponse("Failed to update the account"));
                 }
 
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -449,14 +441,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (account == null)
                 {
-                    return NotFound("Failed to closed the account.");
+                    return NotFound(_accountService.FormatErrorResponse("Failed to closed the account"));
                 }
 
                 return Ok("Account is closed");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }
@@ -470,14 +462,14 @@ namespace BankTechAccountSavings.API.Controllers
 
                 if (account == null)
                 {
-                    return NotFound("Failed to delete the account.");
+                    return NotFound(_accountService.FormatErrorResponse("Failed to delete the account"));
                 }
 
                 return Ok(account);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
         }

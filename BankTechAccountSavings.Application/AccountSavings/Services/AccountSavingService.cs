@@ -171,5 +171,10 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             AccountSaving? accountSaving = await _accountSavingRepository.DeleteAsync(accountId);
             return _mapper.Map<DeletedAccountSavingResponse>(accountSaving);
         }
+
+        public string FormatErrorResponse(string errorMessage)
+        {
+            return $"\"errorMessage\": \"{errorMessage}\"";
+        }
     }
 }

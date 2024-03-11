@@ -27,5 +27,7 @@ namespace BankTechAccountSavings.Application.Transactions.Interfaces
         internal Task<Paginated<GetDeposit>> GetPaginatedDepositsByAccountAsync(Guid accountId, int page, int pageSize);
         internal Task<Paginated<GetWithdraw>> GetPaginatedWithdrawsByAccountAsync(Guid accountId, int page, int pageSize);
         internal Task<Paginated<GetTransfer>> GetPaginatedTransfersByAccountAsync(Guid accountId, int page, int pageSize);
+
+        string FormatErrorResponse(string errorMessage);
     }
 }

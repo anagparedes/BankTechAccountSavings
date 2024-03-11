@@ -24,5 +24,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Interfaces
         Task<GetAccountSaving?> GetAccountSavingByAccountNumberAsync(long accountNumber);
         Task<UpdatedAccountSavingResponse?> UpdateAccountSavingAsync(Guid accountId, UpdateAccountSaving updateAccountSaving);
         Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid accountId);
+        string FormatErrorResponse(string errorMessage);
     }
 }
