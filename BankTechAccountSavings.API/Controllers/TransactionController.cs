@@ -2,7 +2,6 @@
 using BankTechAccountSavings.Application.Transactions.Interfaces;
 using BankTechAccountSavings.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 
 namespace BankTechAccountSavings.API.Controllers
 {
