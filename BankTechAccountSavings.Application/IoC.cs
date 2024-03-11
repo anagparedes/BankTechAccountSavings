@@ -54,6 +54,18 @@ namespace BankTechAccountSavings.Application
                                                                 })
                                                                 .ToList<IOpenApiAny>()
                 });
+                c.MapType<AccountType>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Enum = Enum.GetValues(typeof(AccountType)).Cast<AccountType>()
+                                                                .Select(value =>
+                                                                {
+                                                                    var fieldInfo = value.GetType().GetField(value.ToString());
+                                                                    var attribute = fieldInfo?.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+                                                                    return new OpenApiString((attribute?.Name) ?? value.ToString());
+                                                                })
+                                                                .ToList<IOpenApiAny>()
+                });
                 c.MapType<Currency>(() => new OpenApiSchema
                 {
                     Type = "string",

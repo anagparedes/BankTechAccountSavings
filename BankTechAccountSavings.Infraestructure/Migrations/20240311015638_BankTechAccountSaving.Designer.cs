@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankTechAccountSavings.Infraestructure.Migrations
 {
     [DbContext(typeof(AccountSavingDbContext))]
-    [Migration("20240310220138_BankTechAccountSaving")]
+    [Migration("20240311015638_BankTechAccountSaving")]
     partial class BankTechAccountSaving
     {
         /// <inheritdoc />
@@ -38,6 +38,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<int>("AccountStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AccountType")
                         .HasColumnType("int");
 
                     b.Property<decimal>("AnnualInterestProjected")
@@ -233,6 +236,12 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                 {
                     b.HasBaseType("BankTechAccountSavings.Domain.Entities.Transaction");
 
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Debit")
                         .HasColumnType("decimal(18,2)");
 
@@ -247,6 +256,12 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("WithdrawCode")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("WithdrawPassword")
+                        .HasColumnType("bigint");
 
                     b.HasIndex("SourceProductId");
 

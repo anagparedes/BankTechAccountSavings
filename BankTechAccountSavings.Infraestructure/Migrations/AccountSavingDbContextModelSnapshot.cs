@@ -37,6 +37,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<int>("AccountStatus")
                         .HasColumnType("int");
 
+                    b.Property<int>("AccountType")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("AnnualInterestProjected")
                         .HasColumnType("decimal(18,2)");
 
@@ -230,6 +233,12 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                 {
                     b.HasBaseType("BankTechAccountSavings.Domain.Entities.Transaction");
 
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Debit")
                         .HasColumnType("decimal(18,2)");
 
@@ -244,6 +253,12 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("WithdrawCode")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("WithdrawPassword")
+                        .HasColumnType("bigint");
 
                     b.HasIndex("SourceProductId");
 

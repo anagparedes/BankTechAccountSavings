@@ -3,7 +3,6 @@ using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Domain.Interfaces;
 using BankTechAccountSavings.Infraestructure.Context;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {
@@ -20,13 +19,13 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 entity.AccountNumber = GenerateBankAccountNumber();
             }
 
-            entity.AccountName ??= "CTA.AHORROS";
+            entity.AccountName = $"CTA.{entity.AccountType}";
             entity.Bank = "BankTech";
             entity.CurrentBalance = entity.CurrentBalance;
             entity.AnnualInterestRate = 0.30m / 100;
             entity.MonthlyInterestGenerated = 0;
             entity.Currency = entity.Currency != 0 ? entity.Currency : Currency.DOP;
-            entity.DateOpened = DateTime.UtcNow.Date;
+            entity.DateOpened = DateTime.UtcNow.Date.ToLocalTime();
             entity.AccountStatus = AccountStatus.Active;
 
             await _context.Set<AccountSaving>().AddAsync(entity, cancellationToken);
@@ -50,7 +49,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 DestinationProductId = account.Id,
                 DestinationProductNumber = account.AccountNumber,
                 Credit = amount,
-                TransactionDate = DateTime.UtcNow.Date,
+                TransactionDate = DateTime.UtcNow.Date.ToLocalTime(),
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
                 Description = description,
@@ -80,15 +79,19 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             Withdraw newWithdraw = new()
             {
+                ClientId = account.ClientId,
+                AccountName = account.AccountName,
                 SourceProduct = account,
                 SourceProductId = account.Id,
                 SourceProductNumber = account.AccountNumber,
+                WithdrawPassword = GenerateWithdrawPassword(),
+                WithdrawCode = GenerateWithdrawCode(),
                 Debit = amount,
                 Amount = amount,
-                TransactionDate = DateTime.UtcNow.Date,
+                TransactionDate = DateTime.UtcNow.Date.ToLocalTime().ToLocalTime(),
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
-                Description = $"Withdraw on day: {DateTime.UtcNow.Date}",
+                Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime().ToLocalTime}",
                 TransactionType = TransactionType.WithDraw,
                 TransactionStatus = TransactionStatus.Completed,
                 Tax = (decimal)(0.0015 * amount),
@@ -301,6 +304,26 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
         }
 
+        private static long GenerateWithdrawPassword()
+        {
+            Random random = new();
+
+            long minAccountNumber = 10000000;
+            long maxAccountNumber = 99999999;
+
+            return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+        }
+
+        private static long GenerateWithdrawCode()
+        {
+            Random random = new();
+
+            long minAccountNumber = 1000;
+            long maxAccountNumber = 9999;
+
+            return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+        }
+
         private static int GenerateConfirmationNumber()
         {
             Random random = new();
@@ -418,7 +441,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 DestinationProductId = account.Id,
                 DestinationProductNumber = account.AccountNumber,
                 Credit = amount,
-                TransactionDate = DateTime.UtcNow.Date,
+                TransactionDate = DateTime.UtcNow.Date.ToLocalTime(),
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
                 Description = description,
@@ -448,15 +471,19 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             Withdraw newWithdraw = new()
             {
+                ClientId = account.ClientId,
+                AccountName = account.AccountName,
                 SourceProduct = account,
                 SourceProductId = account.Id,
                 SourceProductNumber = account.AccountNumber,
+                WithdrawPassword = GenerateWithdrawPassword(),
+                WithdrawCode = GenerateWithdrawCode(),
                 Debit = amount,
                 Amount = amount,
-                TransactionDate = DateTime.UtcNow.Date,
+                TransactionDate = DateTime.UtcNow.Date.ToLocalTime(),
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
-                Description = $"Withdraw on day: {DateTime.UtcNow.Date}",
+                Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime()}",
                 TransactionType = TransactionType.WithDraw,
                 TransactionStatus = TransactionStatus.Completed,
                 Tax = (decimal)(0.0015 * amount),
@@ -486,11 +513,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             }
 
             return transactions;
-        }
-
-        public Task<Paginated<Transaction>> GetTransactionsPaginatedByAccountNumberAsync(IQueryable<Transaction> queryable, long accountNumber, int page, int pageSize)
-        {
-            throw new NotImplementedException();
         }
     }
 }

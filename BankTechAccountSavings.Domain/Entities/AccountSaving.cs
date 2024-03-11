@@ -22,5 +22,6 @@ namespace BankTechAccountSavings.Domain.Entities
         public DateTime DateOpened { get; set; }
         public DateTime DateClosed { get; set; }
         public AccountStatus AccountStatus { get; set; }
+        public AccountType AccountType { get; set; }
     }
 }

@@ -82,6 +82,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             {
                 ClientId = createAccountSaving.ClientId,
                 CurrentBalance = createAccountSaving.CurrentBalance,
+                AccountType = createAccountSaving.AccountType,
                 Currency = createAccountSaving.Currency,
             };
             AccountSaving? newAccount = await _accountSavingRepository.CreateAsync(account);
