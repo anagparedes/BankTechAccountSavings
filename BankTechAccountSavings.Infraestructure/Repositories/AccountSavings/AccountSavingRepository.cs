@@ -155,7 +155,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return newTransfer;
         }
 
-        public async Task<AccountSaving?> DeleteAsync(Guid accountId, string reasonToCloseAccount,  CancellationToken cancellationToken)
+        public async Task<AccountSaving?> DeleteAsync(Guid accountId, string reasonToCloseAccount, CancellationToken cancellationToken)
         {
             AccountSaving account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountId} not found");
 
@@ -339,7 +339,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public IQueryable<AccountSaving> GetAllQueryable()
         {
-            return  _context.Set<AccountSaving>().Where(x => !x.IsDeleted);
+            return _context.Set<AccountSaving>().Where(x => !x.IsDeleted);
         }
 
         public IQueryable<Transaction> GetTransactionsByAccountQueryable(Guid accountId)
