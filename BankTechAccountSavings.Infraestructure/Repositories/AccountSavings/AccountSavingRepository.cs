@@ -3,7 +3,6 @@ using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Domain.Interfaces;
 using BankTechAccountSavings.Infraestructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {
