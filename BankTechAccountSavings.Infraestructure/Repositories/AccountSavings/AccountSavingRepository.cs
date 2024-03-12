@@ -10,7 +10,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
     internal class AccountSavingRepository(AccountSavingDbContext context) : IAccountSavingRepository
     {
         private readonly AccountSavingDbContext _context = context;
-
+        private readonly Random _random = new();
         public async Task<AccountSaving> CreateAsync(AccountSaving entity, CancellationToken cancellationToken)
         {
             entity.AccountNumber = GenerateBankAccountNumber();
@@ -284,55 +284,48 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return currentDate.Month != account?.DateOpened.Month || currentDate.Year != account.DateOpened.Year;
         }
 
-        private static long GenerateBankAccountNumber()
+        private long GenerateBankAccountNumber()
         {
-            Random random = new();
-
             long minAccountNumber = 1000000000;
             long maxAccountNumber = 9999999999;
+            long accountNumber = (long)(_random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
 
-            return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+            return accountNumber;
         }
 
-        private static long GenerateWithdrawPassword()
+        private long GenerateWithdrawPassword()
         {
-            Random random = new();
-
             long minAccountNumber = 10000000;
             long maxAccountNumber = 99999999;
-
-            return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+            long accountNumber = (long)(_random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+            return accountNumber;
         }
 
-        private static long GenerateWithdrawCode()
+        private long GenerateWithdrawCode()
         {
-            Random random = new();
-
             long minAccountNumber = 1000;
             long maxAccountNumber = 9999;
 
-            return (long)(random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+            long accountNumber = (long)(_random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
+            return accountNumber;
         }
 
-        private static int GenerateConfirmationNumber()
+        private int GenerateConfirmationNumber()
         {
-            Random random = new();
 
             int minConfirmationNumber = 1000000;
             int maxConfirmationNumber = 9999999;
 
-            int confirmationNumber = random.Next(minConfirmationNumber, maxConfirmationNumber + 1);
+            int confirmationNumber = _random.Next(minConfirmationNumber, maxConfirmationNumber + 1);
 
             return confirmationNumber;
         }
-        private static long GenerateVoucherNumber()
+        private long GenerateVoucherNumber()
         {
-            Random random = new();
-
             long minConfirmationNumber = 1000000000;
             long maxConfirmationNumber = 9999999999;
 
-            long confirmationNumber = (long)(random.NextDouble() * (maxConfirmationNumber - minConfirmationNumber) + minConfirmationNumber);
+            long confirmationNumber = (long)(_random.NextDouble() * (maxConfirmationNumber - minConfirmationNumber) + minConfirmationNumber);
 
             return confirmationNumber;
         }
