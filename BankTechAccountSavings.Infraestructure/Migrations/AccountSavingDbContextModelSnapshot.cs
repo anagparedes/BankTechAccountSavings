@@ -236,9 +236,6 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<string>("AccountName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Debit")
                         .HasColumnType("decimal(18,2)");
 

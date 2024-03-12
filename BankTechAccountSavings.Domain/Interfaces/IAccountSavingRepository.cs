@@ -14,8 +14,8 @@ namespace BankTechAccountSavings.Domain.Interfaces
         internal Task<Transfer?> TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType, CancellationToken cancellationToken = default);
         internal Task<Deposit?> AddDepositByAccountNumberAsync(int amount, long accountNumber, string description, CancellationToken cancellationToken = default);
         internal Task<Withdraw?> WithDrawByAccountNumberAsync(int amount, long accountNumber, CancellationToken cancellationToken = default);
-        internal IQueryable<AccountSaving> GetAllQueryable();
-        internal IQueryable<Transaction> GetTransactionsByAccountQueryable(Guid accountId);
+        internal IQueryable<AccountSaving> GetAllQueryable(int clientId);
+        internal IQueryable<Transaction> GetTransactionsByAccountQueryable(int clientId);
         internal IQueryable<Transaction> GetTransactionsByAccountNumberQueryable(long accountNumber);
         internal Task<Paginated<Transaction>> GetTransactionsPaginatedAsync(IQueryable<Transaction> queryable, int page, int pageSize);
     }

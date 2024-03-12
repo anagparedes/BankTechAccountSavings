@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankTechAccountSavings.Infraestructure.Migrations
 {
     [DbContext(typeof(AccountSavingDbContext))]
-    [Migration("20240311015638_BankTechAccountSaving")]
+    [Migration("20240312005758_BankTechAccountSaving")]
     partial class BankTechAccountSaving
     {
         /// <inheritdoc />
@@ -238,9 +238,6 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                     b.Property<string>("AccountName")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("Debit")
                         .HasColumnType("decimal(18,2)");

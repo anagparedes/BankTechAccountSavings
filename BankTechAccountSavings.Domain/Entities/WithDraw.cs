@@ -4,7 +4,6 @@
     {
         public AccountSaving? SourceProduct { get; set; }
         public Guid SourceProductId { get; set; }
-        public int ClientId { get; set; }
         public string? AccountName { get; set; }
         public long SourceProductNumber { get; set; }
         public long WithdrawPassword { get; set; }

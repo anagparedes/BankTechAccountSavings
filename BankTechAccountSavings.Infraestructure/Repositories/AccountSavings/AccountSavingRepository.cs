@@ -3,6 +3,7 @@ using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Domain.Interfaces;
 using BankTechAccountSavings.Infraestructure.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 {
@@ -79,7 +80,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             Withdraw newWithdraw = new()
             {
-                ClientId = account.ClientId,
                 AccountName = account.AccountName,
                 SourceProduct = account,
                 SourceProductId = account.Id,
@@ -88,10 +88,10 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 WithdrawCode = GenerateWithdrawCode(),
                 Debit = amount,
                 Amount = amount,
-                TransactionDate = DateTime.UtcNow.Date.ToLocalTime().ToLocalTime(),
+                TransactionDate = DateTime.UtcNow.Date.ToLocalTime(),
                 ConfirmationNumber = GenerateConfirmationNumber(),
                 Voucher = GenerateVoucherNumber(),
-                Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime().ToLocalTime}",
+                Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime()}",
                 TransactionType = TransactionType.WithDraw,
                 TransactionStatus = TransactionStatus.Completed,
                 Tax = (decimal)(0.0015 * amount),
@@ -157,7 +157,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public async Task<AccountSaving?> DeleteAsync(Guid accountId, string reasonToCloseAccount, CancellationToken cancellationToken)
         {
-            AccountSaving account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountId} not found");
+            AccountSaving account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account is not found");
 
             account.AccountStatus = AccountStatus.Closed;
             _context.Set<AccountSaving>().Remove(account);
@@ -170,7 +170,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         {
             return await _context.Set<AccountSaving>().Where(x => !x.IsDeleted).ToListAsync(cancellationToken);
         }
-        public async Task<Paginated<AccountSaving>> GetPaginatedAccountsAsync(IQueryable<AccountSaving> queryable, int page, int pageSize)
+        public async Task<Paginated<AccountSaving>> GetAccountsPaginatedAsync(IQueryable<AccountSaving> queryable, int page, int pageSize)
         {
             var totalItems = await queryable.CountAsync();
 
@@ -208,7 +208,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public async Task<AccountSaving?> GetbyIdAsync(Guid accountId, CancellationToken cancellationToken)
         {
-            AccountSaving account = await _context.Set<AccountSaving>().FindAsync(new object[] { accountId }, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountId} not found");
+            AccountSaving account = await _context.Set<AccountSaving>().FindAsync(new object[] { accountId }, cancellationToken) ?? throw new InvalidOperationException($"The Account is not found");
             return account;
         }
 
@@ -225,7 +225,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             if (transactions == null || transactions.Count == 0)
             {
-                throw new InvalidOperationException($"No transactions found for the account with ID {accountId}.");
+                throw new InvalidOperationException($"No transactions found for the account");
             }
 
             return transactions;
@@ -233,7 +233,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public async Task<AccountSaving?> UpdateAsync(Guid accountId, AccountSaving entity, CancellationToken cancellationToken)
         {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountId} not found");
+            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account is not found");
             if (entity.AccountName != "string")
             {
                 account.AccountName = entity.AccountName;
@@ -258,7 +258,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         {
             if (await HasReachedEndOfMonth(accountId))
             {
-                AccountSaving? account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account with the Id {accountId} not found");
+                AccountSaving? account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account is not found");
                 ;
                 CalculateInterest(accountId);
                 account.MonthlyInterestGenerated = 0;
@@ -337,20 +337,20 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return confirmationNumber;
         }
 
-        public IQueryable<AccountSaving> GetAllQueryable()
+        public IQueryable<AccountSaving> GetAllQueryable(int clientId)
         {
-            return _context.Set<AccountSaving>().Where(x => !x.IsDeleted);
+            return _context.Set<AccountSaving>().Where(acc => acc.ClientId == clientId && !acc.IsDeleted);
         }
 
-        public IQueryable<Transaction> GetTransactionsByAccountQueryable(Guid accountId)
+        public IQueryable<Transaction> GetTransactionsByAccountQueryable(int clientId)
         {
             return _context.Transactions.Where(t =>
-            (t is Deposit && ((Deposit)t).DestinationProductId == accountId) ||
-            (t is Transfer && (((Transfer)t).SourceProductId == accountId ||
-            ((Transfer)t).DestinationProductId == accountId)) ||
-            (t is Withdraw && ((Withdraw)t).SourceProductId == accountId)
-           )
-        .OrderByDescending(t => t.TransactionDate);
+            (t is Deposit && ((Deposit)t).DestinationProduct!.ClientId == clientId) ||
+            (t is Transfer && (((Transfer)t).SourceProduct!.ClientId == clientId ||
+            ((Transfer)t).DestinationProduct!.ClientId == clientId)) ||
+            (t is Withdraw && ((Withdraw)t).SourceProduct!.ClientId == clientId)
+            )
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Transaction> GetTransactionsByAccountNumberQueryable(long accountNumber)
@@ -461,7 +461,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             Withdraw newWithdraw = new()
             {
-                ClientId = account.ClientId,
                 AccountName = account.AccountName,
                 SourceProduct = account,
                 SourceProductId = account.Id,

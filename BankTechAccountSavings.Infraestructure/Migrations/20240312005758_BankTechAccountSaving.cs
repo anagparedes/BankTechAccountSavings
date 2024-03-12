@@ -70,7 +70,6 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     Transfer_Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Withdraw_SourceProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ClientId = table.Column<int>(type: "int", nullable: true),
                     AccountName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Withdraw_SourceProductNumber = table.Column<long>(type: "bigint", nullable: true),
                     WithdrawPassword = table.Column<long>(type: "bigint", nullable: true),

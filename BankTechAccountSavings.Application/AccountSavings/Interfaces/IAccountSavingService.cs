@@ -7,8 +7,8 @@ namespace BankTechAccountSavings.Application.AccountSavings.Interfaces
     public interface IAccountSavingService
     {
         Task<List<GetAccountSaving>> GetAllAccountsAsync();
-        Task<Paginated<GetAccountSaving>> GetPaginatedAccountsAsync(int page, int pageSize);
-        Task<Paginated<GetTransaction>> GetPaginatedTransactionsByAccountAsync(Guid accountId, int page, int pageSize);
+        Task<Paginated<GetAccountSaving>> GetPaginatedAccountsAsync(int clientId, int page, int pageSize);
+        Task<Paginated<GetTransaction>> GetPaginatedTransactionsByAccountAsync(int ClientId, int page, int pageSize);
         Task<Paginated<GetTransaction>> GetPaginatedTransactionsByAccountNumberAsync(long accountNumber, int page, int pageSize);
         Task<CreatedAccountSavingResponse?> CreateAccountSavingAsync(CreateAccountSaving createAccountSaving);
         Task<GetDeposit?> AddDepositAsync(int amount, Guid accountId, string description);

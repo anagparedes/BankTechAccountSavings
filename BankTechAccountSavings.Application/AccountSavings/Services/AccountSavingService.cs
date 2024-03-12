@@ -20,10 +20,10 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return accountSaving.Select(st => _mapper.Map<GetAccountSaving>(st)).ToList();
         }
 
-        async Task<Paginated<GetAccountSaving>> IAccountSavingService.GetPaginatedAccountsAsync(int page, int pageSize)
+        async Task<Paginated<GetAccountSaving>> IAccountSavingService.GetPaginatedAccountsAsync(int clientId, int page, int pageSize)
         {
-            IQueryable<AccountSaving> queryable = _accountSavingRepository.GetAllQueryable();
-            Paginated<AccountSaving> paginatedResult = await _accountSavingRepository.GetPaginatedAccountsAsync(queryable, page, pageSize);
+            IQueryable<AccountSaving> queryable = _accountSavingRepository.GetAllQueryable(clientId);
+            Paginated<AccountSaving> paginatedResult = await _accountSavingRepository.GetAccountsPaginatedAsync(queryable, page, pageSize);
 
             List<GetAccountSaving> result = paginatedResult.Items != null
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetAccountSaving>(st)).ToList() :
@@ -38,9 +38,9 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             };
         }
 
-        async Task<Paginated<GetTransaction>> IAccountSavingService.GetPaginatedTransactionsByAccountAsync(Guid accountId, int page, int pageSize)
+        async Task<Paginated<GetTransaction>> IAccountSavingService.GetPaginatedTransactionsByAccountAsync(int ClientId, int page, int pageSize)
         {
-            IQueryable<Transaction> queryable = _accountSavingRepository.GetTransactionsByAccountQueryable(accountId);
+            IQueryable<Transaction> queryable = _accountSavingRepository.GetTransactionsByAccountQueryable(ClientId);
 
             Paginated<Transaction> paginatedResult = await _accountSavingRepository.GetTransactionsPaginatedAsync(queryable, page, pageSize);
 

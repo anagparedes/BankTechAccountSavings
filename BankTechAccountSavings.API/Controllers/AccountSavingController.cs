@@ -43,12 +43,12 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-        [HttpGet("paginated")]
-        public async Task<ActionResult<Paginated<GetAccountSaving>>> GetPaginatedAccounts(int page, int pageSize)
+        [HttpGet("{clientId:int}/paginated")]
+        public async Task<ActionResult<Paginated<GetAccountSaving>>> GetPaginatedAccounts(int clientId ,int page, int pageSize)
         {
             try
             {
-                Paginated<GetAccountSaving> paginatedResult = await _accountService.GetPaginatedAccountsAsync(page, pageSize);
+                Paginated<GetAccountSaving> paginatedResult = await _accountService.GetPaginatedAccountsAsync(clientId, page, pageSize);
 
                 if (paginatedResult.Items == null)
                 {
@@ -63,16 +63,16 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-        [HttpGet("{accountId:Guid}/paginated/transactions")]
-        public async Task<ActionResult<Paginated<GetTransaction>>> GetPaginatedTransactions(Guid accountId, int page, int pageSize)
+        [HttpGet("client/{clientId:int}/paginated/transactions")]
+        public async Task<ActionResult<Paginated<GetTransaction>>> GetClientPaginatedTransactions(int clientId, int page, int pageSize)
         {
             try
             {
-                Paginated<GetTransaction> paginatedResult = await _accountService.GetPaginatedTransactionsByAccountAsync(accountId, page, pageSize);
+                Paginated<GetTransaction> paginatedResult = await _accountService.GetPaginatedTransactionsByAccountAsync(clientId, page, pageSize);
 
                 if (paginatedResult.Items == null)
                 {
-                    return NotFound(_accountService.FormatErrorResponse($"No Transactions were found for the account {accountId}"));
+                    return NotFound(_accountService.FormatErrorResponse($"No Transactions were found for the client"));
                 }
 
                 return Ok(paginatedResult);
