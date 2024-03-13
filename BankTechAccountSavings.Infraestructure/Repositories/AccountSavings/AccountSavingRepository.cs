@@ -11,6 +11,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
     {
         private readonly AccountSavingDbContext _context = context;
         private readonly Random _random = new();
+
         public async Task<AccountSaving> CreateAsync(AccountSaving entity, CancellationToken cancellationToken)
         {
             entity.AccountNumber = GenerateBankAccountNumber();
@@ -30,7 +31,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             entity.AccountStatus = AccountStatus.Active;
 
             await _context.Set<AccountSaving>().AddAsync(entity, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
             return entity;
         }
 
@@ -61,7 +61,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             account.Deposits.Add(newDeposit);
             await _context.Set<Deposit>().AddAsync(newDeposit, cancellationToken);
 
-            await _context.SaveChangesAsync(cancellationToken);
             return account.Deposits.LastOrDefault();
         }
 
@@ -100,7 +99,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             account.CurrentBalance -= (decimal)newWithdraw.Total;
             await _context.Set<Withdraw>().AddAsync(newWithdraw, cancellationToken);
             account.WithDraws.Add(newWithdraw);
-            await _context.SaveChangesAsync(cancellationToken);
             return account.WithDraws.LastOrDefault();
         }
 
@@ -150,8 +148,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             fromAccount.TransfersAsSource.Add(newTransfer);
             toAccount.TransfersAsDestination.Add(newTransfer);
 
-            await _context.SaveChangesAsync(cancellationToken);
-
             return newTransfer;
         }
 
@@ -161,14 +157,13 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             account.AccountStatus = AccountStatus.Closed;
             _context.Set<AccountSaving>().Remove(account);
-            await _context.SaveChangesAsync(cancellationToken);
 
             return account;
         }
 
         public async Task<List<AccountSaving>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await _context.Set<AccountSaving>().Where(x => !x.IsDeleted).ToListAsync(cancellationToken);
+            return await _context.Set<AccountSaving>().Where(x => !x.IsDeleted).ToListAsync(cancellationToken) ?? throw new InvalidOperationException("Invalid Deposit Amount");
         }
         public async Task<Paginated<AccountSaving>> GetAccountsPaginatedAsync(IQueryable<AccountSaving> queryable, int page, int pageSize)
         {
@@ -241,8 +236,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
             account.AccountStatus = entity.AccountStatus != 0 ? entity.AccountStatus : account.AccountStatus;
             await CalculateAndResetInterest(account.Id, cancellationToken);
-
-            await _context.SaveChangesAsync(cancellationToken);
 
             return account;
         }
@@ -332,7 +325,12 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public IQueryable<AccountSaving> GetAllQueryable(int clientId)
         {
-            return _context.Set<AccountSaving>().Where(acc => acc.ClientId == clientId && !acc.IsDeleted);
+            IQueryable<AccountSaving> accounts = _context.Set<AccountSaving>().Where(acc => acc.ClientId == clientId && !acc.IsDeleted);
+            if (accounts.Any() == false)
+            {
+                throw new InvalidOperationException("The client doesn't has accounts");
+            }
+            return accounts;
         }
 
         public IQueryable<Transaction> GetTransactionsByAccountQueryable(int clientId)
@@ -403,8 +401,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             fromAccount.TransfersAsSource.Add(newTransfer);
             toAccount.TransfersAsDestination.Add(newTransfer);
 
-            await _context.SaveChangesAsync(cancellationToken);
-
             return newTransfer;
         }
 
@@ -435,7 +431,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             account.Deposits.Add(newDeposit);
             await _context.Set<Deposit>().AddAsync(newDeposit, cancellationToken);
 
-            await _context.SaveChangesAsync(cancellationToken);
             return account.Deposits.LastOrDefault();
         }
 
@@ -474,7 +469,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             account.CurrentBalance -= (decimal)newWithdraw.Total;
             await _context.Set<Withdraw>().AddAsync(newWithdraw, cancellationToken);
             account.WithDraws.Add(newWithdraw);
-            await _context.SaveChangesAsync(cancellationToken);
             return account.WithDraws.LastOrDefault();
         }
 
@@ -495,6 +489,11 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             }
 
             return transactions;
+        }
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

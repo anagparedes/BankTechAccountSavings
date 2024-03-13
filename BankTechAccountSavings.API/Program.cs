@@ -28,6 +28,26 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+
+    options.AddPolicy("ProductionOrigins",
+    builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,18 +59,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
-});
 
+app.UseRouting();
+
+#if DEBUG
 app.UseCors("AllowAllOrigins");
+#else
+app.UseCors("ProductionOrigins");
+#endif
+
 
 app.UseAuthorization();
 

@@ -13,6 +13,6 @@ namespace BankTechAccountSavings.Domain.Interfaces
         IQueryable<T> queryable,
         int page,
         int pageSize);
-
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }
