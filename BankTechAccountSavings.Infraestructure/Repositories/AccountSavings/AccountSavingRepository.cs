@@ -185,7 +185,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         public IQueryable<AccountSaving> GetAllQueryable(int clientId)
         {
             IQueryable<AccountSaving> accounts = _context.Set<AccountSaving>().Where(acc => acc.ClientId == clientId && !acc.IsDeleted)
-                .OrderBy(t => t.CreatedDate);
+                .OrderByDescending(t => t.CreatedDate);
             if (accounts.Any() == false)
             {
                 throw new InvalidOperationException("The client doesn't has accounts");
@@ -195,24 +195,27 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public IQueryable<Transaction> GetTransactionsByAccountQueryable(int clientId)
         {
-            return _context.Transactions.Where(t =>
+            IQueryable<Transaction> transactions = _context.Transactions.Where(t =>
             (t is Deposit && ((Deposit)t).DestinationProduct!.ClientId == clientId) ||
             (t is Transfer && (((Transfer)t).SourceProduct!.ClientId == clientId ||
             ((Transfer)t).DestinationProduct!.ClientId == clientId)) ||
             (t is Withdraw && ((Withdraw)t).SourceProduct!.ClientId == clientId)
             )
-                .OrderBy(t => t.TransactionDate);
+                .OrderByDescending(t => t.CreatedDate);
+            return transactions;
         }
 
         public IQueryable<Transaction> GetTransactionsByAccountNumberQueryable(long accountNumber)
         {
-            return _context.Transactions.Where(t =>
+            IQueryable<Transaction> transactions = _context.Transactions.Where(t =>
             (t is Deposit && ((Deposit)t).DestinationProductNumber == accountNumber) ||
             (t is Transfer && (((Transfer)t).SourceProductNumber == accountNumber ||
             ((Transfer)t).DestinationProductNumber == accountNumber)) ||
             (t is Withdraw && ((Withdraw)t).SourceProductNumber == accountNumber)
            )
-        .OrderBy(t => t.TransactionDate);
+        .OrderByDescending(t => t.CreatedDate);
+
+            return transactions;
         }
 
         public async Task<Deposit?> CreateDepositAsync(Deposit entity, CancellationToken cancellationToken = default)
@@ -289,7 +292,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         async Task<Withdraw?> IAccountSavingRepository.CreateWithdrawAsync(Withdraw entity, CancellationToken cancellationToken)
         {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == entity.SourceProductId, cancellationToken) ?? throw new InvalidOperationException($"The Account not found. Please ensure that the account exists and is correctly specified.\r\n");
+            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == entity.SourceProductNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account not found. Please ensure that the account exists and is correctly specified.\r\n");
             if (account.CurrentBalance < entity.Amount)
             {
                 throw new InvalidOperationException("Insufficient Funds");
@@ -327,7 +330,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         public IQueryable<Transfer> GetTransfersByAccountQueryable(int clientId)
         {
             return _context.Transfers.Where(w => w.SourceProduct!.ClientId == clientId || w.DestinationProduct!.ClientId == clientId)
-                .OrderBy(t => t.TransactionDate);
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public async Task<Paginated<Transfer>> GetTransfersPaginatedAsync(IQueryable<Transfer> queryable, int page, int pageSize)
