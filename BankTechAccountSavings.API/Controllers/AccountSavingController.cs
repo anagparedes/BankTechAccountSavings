@@ -1,7 +1,6 @@
 ﻿using BankTechAccountSavings.Application.AccountSavings.Dtos;
 using BankTechAccountSavings.Application.AccountSavings.Interfaces;
 using BankTechAccountSavings.Application.Transactions.Dtos;
-using BankTechAccountSavings.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
 using BankTechAccountSavings.Domain.Entities;
@@ -41,7 +40,7 @@ namespace BankTechAccountSavings.API.Controllers
         }
 
         [HttpGet("{clientId:int}/paginated")]
-        public async Task<ActionResult<Paginated<GetAccountSaving>>> GetPaginatedAccounts(int clientId ,int page, int pageSize)
+        public async Task<ActionResult<Paginated<GetAccountSaving>>> GetPaginatedAccounts(int clientId, int page, int pageSize)
         {
             try
             {
@@ -79,6 +78,7 @@ namespace BankTechAccountSavings.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
         }
+
         [HttpGet("{clientId:int}/paginated/transfers")]
         public async Task<ActionResult<Paginated<GetTransfer>>> GetPaginatedTransfersByAccount(int clientId, int page, int pageSize)
         {
@@ -119,129 +119,9 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-        [HttpGet("{accountId:Guid}")]
-        public async Task<ActionResult<GetAccountSaving>> GetAccountById(Guid accountId)
-        {
-            try
-            {
-                GetAccountSaving? account = await _accountService.GetAccountSavingByIdAsync(accountId);
-
-                if (account == null)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("No Account found"));
-                }
-
-                return Ok(account);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-        }
-
-        [HttpGet("account-number/{accountNumber:long}")]
-        public async Task<ActionResult<GetAccountSaving>> GetAccountByAccountNumber(long accountNumber)
-        {
-            try
-            {
-                GetAccountSaving? account = await _accountService.GetAccountSavingByAccountNumberAsync(accountNumber);
-
-                if (account == null)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("No Account found"));
-                }
-
-                return Ok(account);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-
-        }
-
-        [HttpGet("{accountId:Guid}/transactions")]
-        public async Task<ActionResult<List<GetTransaction>>> GetTransactionHistory(Guid accountId)
-        {
-            try
-            {
-                List<GetTransaction>? transactions = await _accountService.GetTransactionsHistory(accountId);
-
-                if (transactions == null || transactions.Count == 0)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("No Transactions found"));
-                }
-
-                return Ok(transactions);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-        }
-
-        [HttpGet("{accountNumber:long}/transactions")]
-        public async Task<ActionResult<List<GetTransaction>>> GetTransactionHistory(long accountNumber)
-        {
-            try
-            {
-                List<GetTransaction>? transactions = await _accountService.GetTransactionsHistoryByAccountNumber(accountNumber);
-
-                if (transactions == null || transactions.Count == 0)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("No Transactions found"));
-                }
-
-                return Ok(transactions);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-        }
-
-
-       /* [HttpPost("{accountId:Guid}/deposit")]
-        public async Task<ActionResult<GetDeposit>?> AddDeposit(int amount, Guid accountId, string? description)
-        {
-            var createDeposit = new CreateDeposit
-            {
-                Amount = amount,
-                Des = accountId,
-                Description = description!
-            };
-            try
-            {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createDeposit, _createDeposit);
-                if (validationResult != null)
-                {
-                    return validationResult;
-                }
-                GetDeposit? deposit = await _accountService.AddDepositAsync(amount, accountId, description!);
-
-                if (deposit == null)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("Deposit failed"));
-                }
-
-                return Ok(deposit);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-
-        }*/
-
         [HttpPost("deposit")]
         public async Task<ActionResult<GetDeposit>?> AddDeposit(CreateDeposit createDeposit)
         {
-            /*var newDeposit = new CreateDepositByAccountNumber
-            {
-                Amount = createDeposit.Amount,
-                DestinationProductNumber = createDeposit.DestinationProductNumber,
-                Description = createDeposit.Description!
-            };*/
             try
             {
                 ActionResult? validationResult = await ValidateAndReturnResultAsync(createDeposit, _createDeposit);
@@ -264,45 +144,9 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-       /* [HttpPost("{accountId:Guid}/withdraw")]
-        public async Task<ActionResult<GetWithdraw>?> AddWithDraw(int amount, Guid accountId)
-        {
-            var createWithdraw = new CreateWithdraw
-            {
-                SourceProductNumber = accountId,
-                Amount = amount,
-            };
-            try
-            {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createWithdraw, _createWithdraw);
-                if (validationResult != null)
-                {
-                    return validationResult;
-                }
-                GetWithdraw? withdraw = await _accountService.WithDrawAsync(amount, accountId);
-
-                if (withdraw == null)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("WithDraw failed"));
-                }
-
-                return Ok(withdraw);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-
-        }*/
-
         [HttpPost("withdraw")]
         public async Task<ActionResult<GetWithdraw>?> AddWithDraw(CreateWithdraw createWithdraw)
         {
-           /* var createWithdraw = new CreateWithdraw
-            {
-                SourceProductNumber = accountNumber,
-                Amount = amount,
-            };*/
             try
             {
                 ActionResult? validationResult = await ValidateAndReturnResultAsync(createWithdraw, _createWithdraw);
@@ -325,53 +169,9 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-       /* [HttpPost("{fromAccountId:Guid}/transfer/{toAccountId:Guid}")]
-        public async Task<ActionResult<GetTransfer>?> TransferFunds(Guid fromAccountId, Guid toAccountId, string? description, int transferAmount, TransferType transactionType)
-        {
-            var createTransfer = new CreateTransfer
-            {
-                SourceProductId = fromAccountId,
-                DestinationProductId = toAccountId,
-                Description = description!,
-                Amount = transferAmount,
-                TransferType = transactionType
-
-            };
-            try
-            {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createTransfer);
-                if (validationResult != null)
-                {
-                    return validationResult;
-                }
-                GetTransfer? transaction = await _accountService.TransferFunds(fromAccountId, toAccountId, description!, transferAmount, transactionType);
-
-                if (transaction == null)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("Transaction failed"));
-                }
-
-                return Ok(transaction);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-
-        }*/
-
         [HttpPost("transfer")]
         public async Task<ActionResult<GetTransfer>?> TransferFunds(CreateTransfer createTransfer)
         {
-        /*    var createTransfer = new CreateTransfer
-            {
-                SourceProductNumber = fromAccountNumber,
-                DestinationProductNumber = toAccountNumber,
-                Description = description!,
-                Amount = transferAmount,
-                TransferType = transactionType
-
-            };*/
             try
             {
                 ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createTransfer);

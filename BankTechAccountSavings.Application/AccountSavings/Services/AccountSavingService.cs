@@ -3,7 +3,6 @@ using BankTechAccountSavings.Application.AccountSavings.Dtos;
 using BankTechAccountSavings.Application.AccountSavings.Interfaces;
 using AutoMapper;
 using BankTechAccountSavings.Domain.Entities;
-using BankTechAccountSavings.Domain.Enums;
 using BankTechAccountSavings.Application.Transactions.Dtos;
 
 namespace BankTechAccountSavings.Application.AccountSavings.Services
@@ -137,55 +136,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             Transfer? transaction = await _accountSavingRepository.CreateTransferAsync(transfer);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetTransfer>(transaction);
-        }
-
-       /* async Task<GetDepositByAccountNumber?> IAccountSavingService.AddDepositByAccountNumberAsync(int amount, long accountNumber, string description)
-        {
-            Deposit? transaction = await _accountSavingRepository.AddDepositByAccountNumberAsync(amount, accountNumber, description);
-            await _accountSavingRepository.SaveChangesAsync();
-            return _mapper.Map<GetDepositByAccountNumber>(transaction);
-        }
-
-        async Task<GetWithdrawByAccountNumber?> IAccountSavingService.WithDrawByAccountNumberAsync(int amount, long accountNumber)
-        {
-            Withdraw? transaction = await _accountSavingRepository.WithDrawByAccountNumberAsync(amount, accountNumber);
-            await _accountSavingRepository.SaveChangesAsync();
-            return _mapper.Map<GetWithdrawByAccountNumber>(transaction);
-        }*/
-
-        /*async Task<GetTransferByAccountNumber?> IAccountSavingService.TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType)
-        {
-            Transfer? transaction = await _accountSavingRepository.TransferFundsByAccountNumberAsync(fromAccountNumber, toAccountNumber, description, transferAmount, transferType);
-            await _accountSavingRepository.SaveChangesAsync();
-            return _mapper.Map<GetTransferByAccountNumber>(transaction);
-        }
-*/
-        async Task<List<GetTransaction>?> IAccountSavingService.GetTransactionsHistory(Guid accountId)
-        {
-            List<Transaction>? transactions = await _accountSavingRepository.GetTransactionsHistory(accountId);
-            await _accountSavingRepository.SaveChangesAsync();
-            return transactions?.Select(st => _mapper.Map<GetTransaction>(st)).ToList();
-        }
-
-        async Task<List<GetTransaction>?> IAccountSavingService.GetTransactionsHistoryByAccountNumber(long accountNumber)
-        {
-            List<Transaction>? transactions = await _accountSavingRepository.GetTransactionsHistoryByAccountNumber(accountNumber);
-            await _accountSavingRepository.SaveChangesAsync();
-            return transactions?.Select(st => _mapper.Map<GetTransaction>(st)).ToList();
-        }
-
-        async Task<GetAccountSaving?> IAccountSavingService.GetAccountSavingByIdAsync(Guid accountId)
-        {
-            AccountSaving? accountSaving = await _accountSavingRepository.GetbyIdAsync(accountId);
-            await _accountSavingRepository.SaveChangesAsync();
-            return _mapper.Map<GetAccountSaving>(accountSaving);
-        }
-
-        async Task<GetAccountSaving?> IAccountSavingService.GetAccountSavingByAccountNumberAsync(long accountNumber)
-        {
-            AccountSaving? accountSaving = await _accountSavingRepository.GetAccountbyAccountNumber(accountNumber);
-            await _accountSavingRepository.SaveChangesAsync();
-            return _mapper.Map<GetAccountSaving>(accountSaving);
         }
 
         async Task<UpdatedAccountSavingResponse?> IAccountSavingService.UpdateAccountSavingAsync(Guid accountId, UpdateAccountSaving updateAccountSaving)

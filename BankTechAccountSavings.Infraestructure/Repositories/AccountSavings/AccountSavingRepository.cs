@@ -92,25 +92,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return account;
         }
 
-        public async Task<List<Transaction>?> GetTransactionsHistory(Guid accountId, CancellationToken cancellationToken)
-        {
-            List<Transaction> transactions = await _context.Set<Transaction>()
-           .Where(t =>
-            (t is Deposit && ((Deposit)t).DestinationProductId == accountId) ||
-           (t is Transfer && (((Transfer)t).SourceProductId == accountId || ((Transfer)t).DestinationProductId == accountId)) ||
-           (t is Withdraw && ((Withdraw)t).SourceProductId == accountId)
-           )
-        .OrderByDescending(t => t.TransactionDate)
-        .ToListAsync(cancellationToken);
-
-            if (transactions == null || transactions.Count == 0)
-            {
-                throw new InvalidOperationException($"No transactions found for the account");
-            }
-
-            return transactions;
-        }
-
         public async Task<AccountSaving?> UpdateAsync(Guid accountId, AccountSaving entity, CancellationToken cancellationToken)
         {
             var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId, cancellationToken) ?? throw new InvalidOperationException($"The Account is not found");
@@ -122,13 +103,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             account.AccountStatus = entity.AccountStatus != 0 ? entity.AccountStatus : account.AccountStatus;
             await CalculateAndResetInterest(account.Id, cancellationToken);
 
-            return account;
-        }
-
-        public async Task<AccountSaving?> GetAccountbyAccountNumber(long accountNumber, CancellationToken cancellationToken)
-        {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == accountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountNumber} not found");
-            ;
             return account;
         }
 
@@ -240,92 +214,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         .OrderByDescending(t => t.TransactionDate);
         }
 
-        public async Task<Transfer?> TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType, CancellationToken cancellationToken = default)
-        {
-            AccountSaving? fromAccount = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == fromAccountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {fromAccountNumber} not found");
-            AccountSaving? toAccount = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == toAccountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {toAccountNumber} not found");
-
-            if (fromAccount == null || toAccount == null)
-            {
-                throw new InvalidOperationException("Account not found");
-            }
-
-            if (transferAmount <= 0 || transferAmount > fromAccount.CurrentBalance)
-            {
-                throw new InvalidOperationException("Invalid transfer amount or insufficient funds");
-            }
-
-            int commission = (transferType == TransferType.LBTR) ? 100 : 0;
-
-            Transfer newTransfer = new()
-            {
-                SourceProduct = fromAccount,
-                SourceProductId = fromAccount.Id,
-                SourceProductNumber = fromAccount.AccountNumber,
-                DestinationProduct = toAccount,
-                DestinationProductId = toAccount.Id,
-                DestinationProductNumber = toAccount.AccountNumber,
-                TransferType = transferType,
-                TransactionType = TransactionType.Transfer,
-                Description = description,
-                TransactionDate = DateTime.Today,
-                ConfirmationNumber = GenerateConfirmationNumber(),
-                Voucher = GenerateVoucherNumber(),
-                TransactionStatus = TransactionStatus.Completed,
-                Amount = transferAmount,
-                Commission = commission,
-                Tax = (decimal)(0.0015 * transferAmount),
-                Total = (decimal)(transferAmount + 100 + (0.0015 * transferAmount)),
-                Credit = transferAmount,
-                Debit = transferAmount
-            };
-
-            fromAccount.CurrentBalance -= (decimal)newTransfer.Total;
-            toAccount.CurrentBalance += transferAmount;
-
-            fromAccount.TransfersAsSource.Add(newTransfer);
-            toAccount.TransfersAsDestination.Add(newTransfer);
-
-            return newTransfer;
-        }
-
-        public async Task<Withdraw?> WithDrawByAccountNumberAsync(int amount, long accountNumber, CancellationToken cancellationToken = default)
-        {
-            var account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.AccountNumber == accountNumber, cancellationToken) ?? throw new InvalidOperationException($"The Account with the number {accountNumber} not found");
-            if (account.CurrentBalance < amount)
-            {
-                throw new InvalidOperationException("Insufficient Funds");
-            }
-            else if (amount <= 0)
-            {
-                throw new InvalidOperationException("Invalid withdraw amount");
-            }
-
-            Withdraw newWithdraw = new()
-            {
-                AccountName = account.AccountName,
-                SourceProduct = account,
-                SourceProductId = account.Id,
-                SourceProductNumber = account.AccountNumber,
-                WithdrawPassword = GenerateWithdrawPassword(),
-                WithdrawCode = GenerateWithdrawCode(),
-                Debit = amount,
-                Amount = amount,
-                TransactionDate = DateTime.UtcNow.Date.ToLocalTime(),
-                ConfirmationNumber = GenerateConfirmationNumber(),
-                Voucher = GenerateVoucherNumber(),
-                Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime()}",
-                TransactionType = TransactionType.WithDraw,
-                TransactionStatus = TransactionStatus.Completed,
-                Tax = (decimal)(0.0015 * amount),
-                Total = (decimal)(amount + 100 + (0.0015 * amount))
-            };
-            account.CurrentBalance -= (decimal)newWithdraw.Total;
-            await _context.Set<Withdraw>().AddAsync(newWithdraw, cancellationToken);
-            account.WithDraws.Add(newWithdraw);
-            return account.WithDraws.LastOrDefault();
-        }
-
         public async Task<Deposit?> CreateDepositAsync(Deposit entity, CancellationToken cancellationToken = default)
         {
             var account = await _context.AccountSavings.FirstOrDefaultAsync(s => s.Id == entity.DestinationProductId, cancellationToken) ?? throw new InvalidOperationException($"The Account don't exist");
@@ -435,30 +323,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return account.WithDraws.LastOrDefault();
         }
 
-        public async Task<List<Transaction>?> GetTransactionsHistoryByAccountNumber(long accountNumber, CancellationToken cancellationToken = default)
-        {
-            List<Transaction> transactions = await _context.Set<Transaction>()
-           .Where(t =>
-            (t is Deposit && ((Deposit)t).DestinationProductNumber == accountNumber) ||
-           (t is Transfer && (((Transfer)t).SourceProductNumber == accountNumber || ((Transfer)t).DestinationProductNumber == accountNumber)) ||
-           (t is Withdraw && ((Withdraw)t).SourceProductNumber == accountNumber)
-           )
-        .OrderByDescending(t => t.TransactionDate)
-        .ToListAsync(cancellationToken);
-
-            if (transactions == null || transactions.Count == 0)
-            {
-                throw new InvalidOperationException($"No transactions found for the account with number {accountNumber}.");
-            }
-
-            return transactions;
-        }
-
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            return _context.SaveChangesAsync(cancellationToken);
-        }
-
         public IQueryable<Transfer> GetTransfersByAccountQueryable(int clientId)
         {
             return _context.Transfers.Where(w => w.SourceProduct!.ClientId == clientId || w.DestinationProduct!.ClientId == clientId);
@@ -480,6 +344,11 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 PageSize = pageSize,
                 CurrentPage = page
             };
+        }
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.SaveChangesAsync(cancellationToken);
         }
     }
 }
