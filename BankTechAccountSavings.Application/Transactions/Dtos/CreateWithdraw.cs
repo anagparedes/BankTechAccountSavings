@@ -2,7 +2,7 @@
 {
     public class CreateWithdraw
     {
-        public Guid SourceProductId { get; set; }
+        public long SourceProductNumber { get; set; }
         public decimal Amount { get; set; }
     }
 }

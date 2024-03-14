@@ -7,8 +7,8 @@ namespace BankTechAccountSavings.Application.Transactions.Validators
     {
         public CreateWithdrawValidator()
         {
-            RuleFor(withdraw => withdraw.SourceProductId)
-                .NotEmpty().WithMessage("Source product ID is required.");
+            RuleFor(withdraw => withdraw.SourceProductNumber)
+                .NotEmpty().WithMessage("Account Number is required.").GreaterThan(0).WithMessage("The source product number must be greater than zero.");
 
             RuleFor(withdraw => withdraw.Amount)
                 .GreaterThan(0).WithMessage("Amount must be greater than 0.");

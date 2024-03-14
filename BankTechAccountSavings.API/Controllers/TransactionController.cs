@@ -93,26 +93,6 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-        [HttpGet("{accountId:Guid}/paginated/transfers")]
-        public async Task<ActionResult<Paginated<GetTransfer>>> GetPaginatedTransfersByAccount(Guid accountId, int page, int pageSize)
-        {
-            try
-            {
-                Paginated<GetTransfer> paginatedResult = await _transactionService.GetPaginatedTransfersByAccountAsync(accountId, page, pageSize);
-
-                if (paginatedResult.Items == null)
-                {
-                    return NotFound(_transactionService.FormatErrorResponse($"No Transfers Transaction were found for the account {accountId}"));
-                }
-
-                return Ok(paginatedResult);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _transactionService.FormatErrorResponse(ex.Message));
-            }
-        }
-
         [HttpGet("transfer/{transactionId:guid}")]
         public async Task<ActionResult<GetTransfer>?> GetTransferbyId(Guid transactionId)
         {

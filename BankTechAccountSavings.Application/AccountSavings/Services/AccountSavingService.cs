@@ -25,7 +25,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             IQueryable<AccountSaving> queryable = _accountSavingRepository.GetAllQueryable(clientId);
             Paginated<AccountSaving> paginatedResult = await _accountSavingRepository.GetAccountsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetAccountSaving> result = paginatedResult.Items?.Any() == true
+            List<GetAccountSaving> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetAccountSaving>(st)).ToList() 
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages 
                 ? throw new InvalidOperationException("There are no more accounts to show") 
@@ -46,7 +46,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
             Paginated<Transaction> paginatedResult = await _accountSavingRepository.GetTransactionsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetTransaction> result = paginatedResult.Items?.Any() == true
+            List<GetTransaction> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetTransaction>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more transactions to show")
@@ -67,7 +67,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
             Paginated<Transaction> paginatedResult = await _accountSavingRepository.GetTransactionsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetTransaction> result = paginatedResult.Items?.Any() == true
+            List<GetTransaction> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetTransaction>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more transactions to show")
@@ -99,28 +99,47 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return _mapper.Map<CreatedAccountSavingResponse>(newAccount);
         }
 
-        async Task<GetDeposit?> IAccountSavingService.AddDepositAsync(int amount, Guid accountId, string description)
+        async Task<GetDeposit?> IAccountSavingService.AddDepositAsync(CreateDeposit createDeposit)
         {
-            Deposit? transaction = await _accountSavingRepository.AddDepositAsync(amount, accountId, description);
+            var deposit = new Deposit
+            {
+                Amount = createDeposit.Amount,
+                DestinationProductNumber = createDeposit.DestinationProductNumber,
+                Description = createDeposit.Description,
+            };
+            Deposit? transaction = await _accountSavingRepository.CreateDepositAsync(deposit);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetDeposit>(transaction);
         }
 
-        async Task<GetWithdraw?> IAccountSavingService.WithDrawAsync(int amount, Guid accountId)
+        async Task<GetWithdraw?> IAccountSavingService.CreateWithdrawAsync(CreateWithdraw createWithdraw)
         {
-            Withdraw? transaction = await _accountSavingRepository.WithDrawAsync(amount, accountId);
+            var withDraw = new Withdraw
+            {
+                Amount = createWithdraw.Amount,
+                SourceProductNumber = createWithdraw.SourceProductNumber,
+            };
+            Withdraw? transaction = await _accountSavingRepository.CreateWithdrawAsync(withDraw);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetWithdraw>(transaction);
         }
 
-        async Task<GetTransfer?> IAccountSavingService.TransferFunds(Guid fromAccountId, Guid toAccountId, string description, int transferAmount, TransferType transferType)
+        async Task<GetTransfer?> IAccountSavingService.CreateTransferAsync(CreateTransfer createTransfer)
         {
-            Transfer? transaction = await _accountSavingRepository.TransferFunds(fromAccountId, toAccountId, description, transferAmount, transferType);
+            var transfer = new Transfer
+            {
+                DestinationProductNumber = createTransfer.DestinationProductNumber,
+                SourceProductNumber = createTransfer.SourceProductNumber,
+                Amount = createTransfer.Amount,
+                Description = createTransfer.Description,
+                TransferType = createTransfer.TransferType
+            };
+            Transfer? transaction = await _accountSavingRepository.CreateTransferAsync(transfer);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetTransfer>(transaction);
         }
 
-        async Task<GetDepositByAccountNumber?> IAccountSavingService.AddDepositByAccountNumberAsync(int amount, long accountNumber, string description)
+       /* async Task<GetDepositByAccountNumber?> IAccountSavingService.AddDepositByAccountNumberAsync(int amount, long accountNumber, string description)
         {
             Deposit? transaction = await _accountSavingRepository.AddDepositByAccountNumberAsync(amount, accountNumber, description);
             await _accountSavingRepository.SaveChangesAsync();
@@ -132,15 +151,15 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             Withdraw? transaction = await _accountSavingRepository.WithDrawByAccountNumberAsync(amount, accountNumber);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetWithdrawByAccountNumber>(transaction);
-        }
+        }*/
 
-        async Task<GetTransferByAccountNumber?> IAccountSavingService.TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType)
+        /*async Task<GetTransferByAccountNumber?> IAccountSavingService.TransferFundsByAccountNumberAsync(long fromAccountNumber, long toAccountNumber, string description, int transferAmount, TransferType transferType)
         {
             Transfer? transaction = await _accountSavingRepository.TransferFundsByAccountNumberAsync(fromAccountNumber, toAccountNumber, description, transferAmount, transferType);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetTransferByAccountNumber>(transaction);
         }
-
+*/
         async Task<List<GetTransaction>?> IAccountSavingService.GetTransactionsHistory(Guid accountId)
         {
             List<Transaction>? transactions = await _accountSavingRepository.GetTransactionsHistory(accountId);
@@ -191,6 +210,27 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
         public string FormatErrorResponse(string errorMessage)
         {
             return $"\"errorMessage\": \"{errorMessage}\"";
+        }
+
+        public async Task<Paginated<GetTransfer>> GetPaginatedTransfersByAccountAsync(int clientId, int page, int pageSize)
+        {
+            IQueryable<Transfer> queryable = _accountSavingRepository.GetTransfersByAccountQueryable(clientId);
+
+            Paginated<Transfer> paginatedResult = await _accountSavingRepository.GetTransfersPaginatedAsync(queryable, page, pageSize);
+
+            List<GetTransfer> result = paginatedResult.Items?.Count > 0
+                ? paginatedResult.Items.Select(st => _mapper.Map<GetTransfer>(st)).ToList()
+                : paginatedResult.CurrentPage > paginatedResult.TotalPages
+                ? throw new InvalidOperationException("There are no more transfer transactions to display")
+                : throw new InvalidOperationException("There are no transfer transactions");
+
+            return new Paginated<GetTransfer>
+            {
+                Items = result,
+                TotalItems = paginatedResult.TotalItems,
+                PageSize = pageSize,
+                CurrentPage = page
+            };
         }
     }
 }

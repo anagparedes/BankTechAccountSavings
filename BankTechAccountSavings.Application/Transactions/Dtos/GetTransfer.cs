@@ -6,7 +6,9 @@ namespace BankTechAccountSavings.Application.Transactions.Dtos
     {
         public Guid Id { get; set; }
         public Guid SourceProductId { get; set; }
+        public long SourceProductNumber { get; set; }
         public Guid DestinationProductId { get; set; }
+        public long DestinationProductNumber { get; set; }
         public DateTime TransactionDate { get; set; }
         public int ConfirmationNumber { get; set; }
         public long Voucher { get; set; }

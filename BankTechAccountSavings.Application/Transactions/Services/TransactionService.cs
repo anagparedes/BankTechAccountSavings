@@ -22,7 +22,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
             IQueryable<Transaction> queryable = _transactionRepository.GetAllTransactionQueryable();
             Paginated<Transaction> paginatedResult = await _transactionRepository.GetTransactionsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetTransaction> result = paginatedResult.Items?.Any() == true
+            List<GetTransaction> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetTransaction>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more transactions to display")
@@ -49,7 +49,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
             IQueryable<Transfer> queryable = _transactionRepository.GetAllTransferQueryable();
             Paginated<Transfer> paginatedResult = await _transactionRepository.GetTransfersPaginatedAsync(queryable, page, pageSize);
 
-            List<GetTransfer> result = paginatedResult.Items?.Any() == true
+            List<GetTransfer> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetTransfer>(st)).ToList() 
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more transfer transactions to display")
@@ -87,7 +87,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
             IQueryable<Deposit> queryable = _transactionRepository.GetAllDepositQueryable();
             Paginated<Deposit> paginatedResult = await _transactionRepository.GetDepositsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetDeposit> result = paginatedResult.Items?.Any() == true
+            List<GetDeposit> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetDeposit>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more deposit transactions to display")
@@ -125,7 +125,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
             IQueryable<Withdraw> queryable = _transactionRepository.GetAllWithdrawQueryable();
             Paginated<Withdraw> paginatedResult = await _transactionRepository.GetWithdrawsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetWithdraw> result = paginatedResult.Items?.Any() == true
+            List<GetWithdraw> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetWithdraw>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more withdraw transactions to display")
@@ -159,7 +159,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
 
             Paginated<Deposit> paginatedResult = await _transactionRepository.GetDepositsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetDeposit> result = paginatedResult.Items?.Any() == true
+            List<GetDeposit> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetDeposit>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more deposit transactions to display")
@@ -180,7 +180,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
 
             Paginated<Withdraw> paginatedResult = await _transactionRepository.GetWithdrawsPaginatedAsync(queryable, page, pageSize);
 
-            List<GetWithdraw> result = paginatedResult.Items?.Any() == true
+            List<GetWithdraw> result = paginatedResult.Items?.Count > 0
                 ? paginatedResult.Items.Select(st => _mapper.Map<GetWithdraw>(st)).ToList()
                 : paginatedResult.CurrentPage > paginatedResult.TotalPages
                 ? throw new InvalidOperationException("There are no more withdraw transactions to display")
@@ -195,26 +195,7 @@ namespace BankTechAccountSavings.Application.Transactions.Services
             };
         }
 
-        public async Task<Paginated<GetTransfer>> GetPaginatedTransfersByAccountAsync(Guid accountId, int page, int pageSize)
-        {
-            IQueryable<Transfer> queryable = _transactionRepository.GetTransfersByAccountQueryable(accountId);
-
-            Paginated<Transfer> paginatedResult = await _transactionRepository.GetTransfersPaginatedAsync(queryable, page, pageSize);
-
-            List<GetTransfer> result = paginatedResult.Items?.Any() == true
-                ? paginatedResult.Items.Select(st => _mapper.Map<GetTransfer>(st)).ToList()
-                : paginatedResult.CurrentPage > paginatedResult.TotalPages
-                ? throw new InvalidOperationException("There are no more transfer transactions to display")
-                : throw new InvalidOperationException("There are no transfer transactions");
-
-            return new Paginated<GetTransfer>
-            {
-                Items = result,
-                TotalItems = paginatedResult.TotalItems,
-                PageSize = pageSize,
-                CurrentPage = page
-            };
-        }
+        
 
         public string FormatErrorResponse(string errorMessage)
         {

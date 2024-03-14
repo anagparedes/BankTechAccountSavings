@@ -10,7 +10,7 @@ namespace BankTechAccountSavings.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountSavingController(IAccountSavingService accountSavingService, IValidator<CreateAccountSaving> createAccountSavingValidator, IValidator<UpdateAccountSaving> updateAccountSavingValidator, IValidator<CreateDeposit> createDepositValidator, IValidator<CreateDepositByAccountNumber> createDepositByAccountNumberValidator, IValidator<CreateWithdraw> createWithdrawValidator, IValidator<CreateWithdrawByAccountNumber> createWithdrawByAccountNumberValidator, IValidator<CreateTransfer> createTransferValidator, IValidator<CreateTransferByAccountNumber> createTransferByAccountNumberValidator) : ControllerBase
+    public class AccountSavingController(IAccountSavingService accountSavingService, IValidator<CreateAccountSaving> createAccountSavingValidator, IValidator<UpdateAccountSaving> updateAccountSavingValidator, IValidator<CreateDeposit> createDepositValidator, IValidator<CreateWithdraw> createWithdrawValidator, IValidator<CreateTransfer> createTransferValidator) : ControllerBase
     {
         private readonly IAccountSavingService _accountService = accountSavingService;
         private readonly IValidator<CreateAccountSaving> _createAccountSavingValidator = createAccountSavingValidator;
@@ -18,9 +18,6 @@ namespace BankTechAccountSavings.API.Controllers
         private readonly IValidator<CreateDeposit> _createDeposit = createDepositValidator;
         private readonly IValidator<CreateWithdraw> _createWithdraw = createWithdrawValidator;
         private readonly IValidator<CreateTransfer> _createTransfer = createTransferValidator;
-        private readonly IValidator<CreateDepositByAccountNumber> _createDepositByAccountNumber = createDepositByAccountNumberValidator;
-        private readonly IValidator<CreateWithdrawByAccountNumber> _createWithdrawByAccountNumber = createWithdrawByAccountNumberValidator;
-        private readonly IValidator<CreateTransferByAccountNumber> _createTransferByAccountNumber = createTransferByAccountNumberValidator;
 
         [HttpGet()]
         public async Task<ActionResult<List<GetAccountSaving>>> GetAccounts()
@@ -73,6 +70,25 @@ namespace BankTechAccountSavings.API.Controllers
                 if (paginatedResult.Items == null)
                 {
                     return NotFound(_accountService.FormatErrorResponse($"No Transactions were found for the client"));
+                }
+
+                return Ok(paginatedResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
+            }
+        }
+        [HttpGet("{clientId:int}/paginated/transfers")]
+        public async Task<ActionResult<Paginated<GetTransfer>>> GetPaginatedTransfersByAccount(int clientId, int page, int pageSize)
+        {
+            try
+            {
+                Paginated<GetTransfer> paginatedResult = await _accountService.GetPaginatedTransfersByAccountAsync(clientId, page, pageSize);
+
+                if (paginatedResult.Items == null)
+                {
+                    return NotFound(_accountService.FormatErrorResponse($"No Transfers Transaction were found for the client"));
                 }
 
                 return Ok(paginatedResult);
@@ -185,13 +201,13 @@ namespace BankTechAccountSavings.API.Controllers
         }
 
 
-        [HttpPost("{accountId:Guid}/deposit")]
+       /* [HttpPost("{accountId:Guid}/deposit")]
         public async Task<ActionResult<GetDeposit>?> AddDeposit(int amount, Guid accountId, string? description)
         {
             var createDeposit = new CreateDeposit
             {
                 Amount = amount,
-                DestinationProductId = accountId,
+                Des = accountId,
                 Description = description!
             };
             try
@@ -215,25 +231,25 @@ namespace BankTechAccountSavings.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
-        }
+        }*/
 
-        [HttpPost("{accountNumber:long}/deposit")]
-        public async Task<ActionResult<GetDepositByAccountNumber>?> AddDeposit(int amount, long accountNumber, string? description)
+        [HttpPost("deposit")]
+        public async Task<ActionResult<GetDeposit>?> AddDeposit(CreateDeposit createDeposit)
         {
-            var createDeposit = new CreateDepositByAccountNumber
+            /*var newDeposit = new CreateDepositByAccountNumber
             {
-                Amount = amount,
-                DestinationProductNumber = accountNumber,
-                Description = description!
-            };
+                Amount = createDeposit.Amount,
+                DestinationProductNumber = createDeposit.DestinationProductNumber,
+                Description = createDeposit.Description!
+            };*/
             try
             {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createDeposit, _createDepositByAccountNumber);
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createDeposit, _createDeposit);
                 if (validationResult != null)
                 {
                     return validationResult;
                 }
-                GetDepositByAccountNumber? deposit = await _accountService.AddDepositByAccountNumberAsync(amount, accountNumber, description!);
+                GetDeposit? deposit = await _accountService.AddDepositAsync(createDeposit);
 
                 if (deposit == null)
                 {
@@ -248,12 +264,12 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-        [HttpPost("{accountId:Guid}/withdraw")]
+       /* [HttpPost("{accountId:Guid}/withdraw")]
         public async Task<ActionResult<GetWithdraw>?> AddWithDraw(int amount, Guid accountId)
         {
             var createWithdraw = new CreateWithdraw
             {
-                SourceProductId = accountId,
+                SourceProductNumber = accountId,
                 Amount = amount,
             };
             try
@@ -277,24 +293,24 @@ namespace BankTechAccountSavings.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
-        }
+        }*/
 
-        [HttpPost("{accountNumber:long}/withdraw")]
-        public async Task<ActionResult<GetWithdrawByAccountNumber>?> AddWithDraw(int amount, long accountNumber)
+        [HttpPost("withdraw")]
+        public async Task<ActionResult<GetWithdraw>?> AddWithDraw(CreateWithdraw createWithdraw)
         {
-            var createWithdraw = new CreateWithdrawByAccountNumber
+           /* var createWithdraw = new CreateWithdraw
             {
                 SourceProductNumber = accountNumber,
                 Amount = amount,
-            };
+            };*/
             try
             {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createWithdraw, _createWithdrawByAccountNumber);
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createWithdraw, _createWithdraw);
                 if (validationResult != null)
                 {
                     return validationResult;
                 }
-                GetWithdrawByAccountNumber? withdraw = await _accountService.WithDrawByAccountNumberAsync(amount, accountNumber);
+                GetWithdraw? withdraw = await _accountService.CreateWithdrawAsync(createWithdraw);
 
                 if (withdraw == null)
                 {
@@ -309,7 +325,7 @@ namespace BankTechAccountSavings.API.Controllers
             }
         }
 
-        [HttpPost("{fromAccountId:Guid}/transfer/{toAccountId:Guid}")]
+       /* [HttpPost("{fromAccountId:Guid}/transfer/{toAccountId:Guid}")]
         public async Task<ActionResult<GetTransfer>?> TransferFunds(Guid fromAccountId, Guid toAccountId, string? description, int transferAmount, TransferType transactionType)
         {
             var createTransfer = new CreateTransfer
@@ -342,12 +358,12 @@ namespace BankTechAccountSavings.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
             }
 
-        }
+        }*/
 
-        [HttpPost("{fromAccountNumber:long}/transfer/{toAccountNumber:long}")]
-        public async Task<ActionResult<GetTransferByAccountNumber>?> TransferFunds(long fromAccountNumber, long toAccountNumber, string? description, int transferAmount, TransferType transactionType)
+        [HttpPost("transfer")]
+        public async Task<ActionResult<GetTransfer>?> TransferFunds(CreateTransfer createTransfer)
         {
-            var createTransfer = new CreateTransferByAccountNumber
+        /*    var createTransfer = new CreateTransfer
             {
                 SourceProductNumber = fromAccountNumber,
                 DestinationProductNumber = toAccountNumber,
@@ -355,15 +371,15 @@ namespace BankTechAccountSavings.API.Controllers
                 Amount = transferAmount,
                 TransferType = transactionType
 
-            };
+            };*/
             try
             {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createTransferByAccountNumber);
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createTransfer);
                 if (validationResult != null)
                 {
                     return validationResult;
                 }
-                GetTransferByAccountNumber? transaction = await _accountService.TransferFundsByAccountNumberAsync(fromAccountNumber, toAccountNumber, description!, transferAmount, transactionType);
+                GetTransfer? transaction = await _accountService.CreateTransferAsync(createTransfer);
 
                 if (transaction == null)
                 {
@@ -432,8 +448,8 @@ namespace BankTechAccountSavings.API.Controllers
 
         }
 
-        [HttpPatch("{accountId:Guid}/close")]
-        public async Task<ActionResult<DeletedAccountSavingResponse>?> CloseAccount(Guid accountId, string reasonToCloseAccount)
+        [HttpPatch("close")]
+        public async Task<ActionResult<DeletedAccountSavingResponse>?> CloseAccount([FromBody] Guid accountId, string reasonToCloseAccount)
         {
             try
             {
