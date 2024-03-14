@@ -272,13 +272,13 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 TransactionStatus = TransactionStatus.Completed,
                 Amount = entity.Amount,
                 Commission = commission,
-                Tax = (decimal)(0.0015) * entity.Amount,
-                Total = (decimal)(entity.Amount + 100 + (decimal)(0.0015) * entity.Amount),
+                Tax = 0.0015m * entity.Amount,
+                Total = (entity.Amount + commission + (0.0015m * entity.Amount)),
                 Credit = entity.Amount,
                 Debit = entity.Amount,
             };
 
-            fromAccount.CurrentBalance -= (decimal)newTransfer.Total;
+            fromAccount.CurrentBalance -= newTransfer.Total;
             toAccount.CurrentBalance += entity.Amount;
 
             fromAccount.TransfersAsSource.Add(newTransfer);
@@ -315,10 +315,10 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime()}",
                 TransactionType = TransactionType.WithDraw,
                 TransactionStatus = TransactionStatus.Completed,
-                Tax = (decimal)(0.0015) * entity.Amount,
-                Total = (decimal)(entity.Amount + 100 + ((decimal)(0.0015) * entity.Amount))
+                Tax = 0.0015m * entity.Amount,
+                Total = (entity.Amount + (0.0015m * entity.Amount))
             };
-            account.CurrentBalance -= (decimal)newWithdraw.Total;
+            account.CurrentBalance -= newWithdraw.Total;
             await _context.Set<Withdraw>().AddAsync(newWithdraw, cancellationToken);
             account.WithDraws.Add(newWithdraw);
             return account.WithDraws.LastOrDefault();
