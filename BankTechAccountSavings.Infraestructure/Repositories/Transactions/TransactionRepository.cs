@@ -131,37 +131,44 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.Transactions
 
         public IQueryable<Transaction> GetAllTransactionQueryable()
         {
-            return _context.Set<Transaction>();
+            return _context.Set<Transaction>()
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Deposit> GetAllDepositQueryable()
         {
-            return _context.Set<Deposit>();
+            return _context.Set<Deposit>()
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Transfer> GetAllTransferQueryable()
         {
-            return _context.Set<Transfer>();
+            return _context.Set<Transfer>()
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Withdraw> GetAllWithdrawQueryable()
         {
-            return _context.Set<Withdraw>();
+            return _context.Set<Withdraw>()
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Deposit> GetDepositsByAccountQueryable(Guid accountId)
         {
-            return _context.Deposits.Where(w => w.DestinationProductId == accountId);
+            return _context.Deposits.Where(w => w.DestinationProductId == accountId)
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Withdraw> GetWithdrawsByAccountQueryable(Guid accountId)
         {
-            return _context.Withdraws.Where(w => w.SourceProductId == accountId);
+            return _context.Withdraws.Where(w => w.SourceProductId == accountId)
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public IQueryable<Transfer> GetTransfersByAccountQueryable(Guid accountId)
         {
-            return _context.Transfers.Where(w => w.SourceProductId == accountId || w.DestinationProductId == accountId);
+            return _context.Transfers.Where(w => w.SourceProductId == accountId || w.DestinationProductId == accountId)
+                .OrderByDescending(t => t.TransactionDate);
         }
 
         public async Task<Paginated<Transaction>> GetTransactionsPaginatedAsync(IQueryable<Transaction> queryable, int page, int pageSize)

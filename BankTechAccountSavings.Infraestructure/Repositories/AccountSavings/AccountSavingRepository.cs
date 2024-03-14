@@ -184,7 +184,8 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public IQueryable<AccountSaving> GetAllQueryable(int clientId)
         {
-            IQueryable<AccountSaving> accounts = _context.Set<AccountSaving>().Where(acc => acc.ClientId == clientId && !acc.IsDeleted);
+            IQueryable<AccountSaving> accounts = _context.Set<AccountSaving>().Where(acc => acc.ClientId == clientId && !acc.IsDeleted)
+                .OrderBy(t => t.CreatedDate);
             if (accounts.Any() == false)
             {
                 throw new InvalidOperationException("The client doesn't has accounts");
@@ -200,7 +201,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             ((Transfer)t).DestinationProduct!.ClientId == clientId)) ||
             (t is Withdraw && ((Withdraw)t).SourceProduct!.ClientId == clientId)
             )
-                .OrderByDescending(t => t.TransactionDate);
+                .OrderBy(t => t.TransactionDate);
         }
 
         public IQueryable<Transaction> GetTransactionsByAccountNumberQueryable(long accountNumber)
@@ -211,7 +212,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             ((Transfer)t).DestinationProductNumber == accountNumber)) ||
             (t is Withdraw && ((Withdraw)t).SourceProductNumber == accountNumber)
            )
-        .OrderByDescending(t => t.TransactionDate);
+        .OrderBy(t => t.TransactionDate);
         }
 
         public async Task<Deposit?> CreateDepositAsync(Deposit entity, CancellationToken cancellationToken = default)
@@ -325,7 +326,8 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
 
         public IQueryable<Transfer> GetTransfersByAccountQueryable(int clientId)
         {
-            return _context.Transfers.Where(w => w.SourceProduct!.ClientId == clientId || w.DestinationProduct!.ClientId == clientId);
+            return _context.Transfers.Where(w => w.SourceProduct!.ClientId == clientId || w.DestinationProduct!.ClientId == clientId)
+                .OrderBy(t => t.TransactionDate);
         }
 
         public async Task<Paginated<Transfer>> GetTransfersPaginatedAsync(IQueryable<Transfer> queryable, int page, int pageSize)
