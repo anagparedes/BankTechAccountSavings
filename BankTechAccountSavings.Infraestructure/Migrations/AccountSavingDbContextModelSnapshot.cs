@@ -37,8 +37,8 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<int>("AccountStatus")
                         .HasColumnType("int");
 
-                    b.Property<int>("AccountType")
-                        .HasColumnType("int");
+                    b.Property<string>("AccountType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("AnnualInterestProjected")
                         .HasColumnType("decimal(18,2)");
@@ -64,17 +64,20 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<decimal>("CurrentBalance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("DateClosed")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("DateClosed")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("DateOpened")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("DateOpened")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("DeletedDate")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -94,6 +97,70 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AccountSavings");
+                });
+
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Beneficiary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("AccountNumberAssociate")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Bank")
+                        .HasColumnType("int");
+
+                    b.Property<long>("BeneficiaryAccountNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("BeneficiaryLastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BeneficiaryName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("DeletedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdentificationCard")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("Beneficiaries");
                 });
 
             modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Transaction", b =>
@@ -131,8 +198,8 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TransactionDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("TransactionStatus")
                         .HasColumnType("int");
@@ -165,6 +232,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.Property<decimal>("Credit")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("DestinationProductId")
                         .HasColumnType("uniqueidentifier");
 
@@ -194,6 +264,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
                     b.Property<long>("DestinationProductNumber")
                         .HasColumnType("bigint");
+
+                    b.Property<int?>("InterbankTransferType")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("SourceProductId")
                         .HasColumnType("uniqueidentifier");
@@ -280,6 +353,17 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     b.HasDiscriminator().HasValue("Withdraw");
                 });
 
+            modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Beneficiary", b =>
+                {
+                    b.HasOne("BankTechAccountSavings.Domain.Entities.AccountSaving", "AccountSavingAssociate")
+                        .WithMany("Beneficiaries")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AccountSavingAssociate");
+                });
+
             modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.Deposit", b =>
                 {
                     b.HasOne("BankTechAccountSavings.Domain.Entities.AccountSaving", "DestinationProduct")
@@ -323,6 +407,8 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
 
             modelBuilder.Entity("BankTechAccountSavings.Domain.Entities.AccountSaving", b =>
                 {
+                    b.Navigation("Beneficiaries");
+
                     b.Navigation("Deposits");
 
                     b.Navigation("TransfersAsDestination");

@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace BankTechAccountSavings.Application.Transactions.Validators
 {
-    public class CreateTransferValidator : AbstractValidator<CreateTransfer>
+    public class CreateInterBankTransferValidator : AbstractValidator<CreateInterBankTransfer>
     {
-        public CreateTransferValidator()
+        public CreateInterBankTransferValidator()
         {
             RuleFor(transfer => transfer.SourceProductNumber)
                 .NotEmpty().WithMessage("Source Product Number is required.").GreaterThan(0).WithMessage("The source product number must be greater than zero.");

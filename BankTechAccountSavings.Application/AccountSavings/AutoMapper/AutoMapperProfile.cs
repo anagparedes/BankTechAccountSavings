@@ -36,6 +36,8 @@ namespace BankTechAccountSavings.Application.AccountSavings.AutoMapper
             CreateMap<UpdatedAccountSavingResponse, AccountSaving>();
             CreateMap<AccountSaving, UpdatedAccountSavingResponse>();
 
+            CreateMap<GetBeneficiary, Beneficiary>();
+            CreateMap<Beneficiary, GetBeneficiary>();
 
         }
     }

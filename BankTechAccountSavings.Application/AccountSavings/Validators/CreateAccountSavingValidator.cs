@@ -8,13 +8,10 @@ namespace BankTechAccountSavings.Application.AccountSavings.Validators
         public CreateAccountSavingValidator()
         {
             RuleFor(account => account.ClientId)
-            .NotEmpty().WithMessage("Client ID is required.");
-
-            RuleFor(account => account.CurrentBalance)
-                .GreaterThan(0).WithMessage("Current balance must be greater than zero.");
+            .NotEmpty().WithMessage("El Id del cliente es requerido.");
 
             RuleFor(account => account.Currency)
-                .IsInEnum().WithMessage("Invalid currency.");
+                .IsInEnum().WithMessage("Moneda inválida.");
         }
     }
 }

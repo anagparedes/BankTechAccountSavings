@@ -9,14 +9,15 @@ namespace BankTechAccountSavings.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountSavingController(IAccountSavingService accountSavingService, IValidator<CreateAccountSaving> createAccountSavingValidator, IValidator<UpdateAccountSaving> updateAccountSavingValidator, IValidator<CreateDeposit> createDepositValidator, IValidator<CreateWithdraw> createWithdrawValidator, IValidator<CreateTransfer> createTransferValidator) : ControllerBase
+    public class AccountSavingController(IAccountSavingService accountSavingService, IValidator<CreateAccountSaving> createAccountSavingValidator, IValidator<UpdateAccountSaving> updateAccountSavingValidator, IValidator<CreateDeposit> createDepositValidator, IValidator<CreateWithdraw> createWithdrawValidator,IValidator<CreateBankTransfer> createBankTransfer, IValidator<CreateInterBankTransfer> createTransferValidator) : ControllerBase
     {
         private readonly IAccountSavingService _accountService = accountSavingService;
         private readonly IValidator<CreateAccountSaving> _createAccountSavingValidator = createAccountSavingValidator;
         private readonly IValidator<UpdateAccountSaving> _updateAccountSavingValidator = updateAccountSavingValidator;
-        private readonly IValidator<CreateDeposit> _createDeposit = createDepositValidator;
-        private readonly IValidator<CreateWithdraw> _createWithdraw = createWithdrawValidator;
-        private readonly IValidator<CreateTransfer> _createTransfer = createTransferValidator;
+        private readonly IValidator<CreateDeposit> _createDepositValidator = createDepositValidator;
+        private readonly IValidator<CreateWithdraw> _createWithdrawValidator = createWithdrawValidator;
+        private readonly IValidator<CreateBankTransfer> _createBankTransferValidator = createBankTransfer;
+        private readonly IValidator<CreateInterBankTransfer> _createTransferValidator = createTransferValidator;
 
         [HttpGet()]
         public async Task<ActionResult<List<GetAccountSaving>>> GetAccounts()
@@ -44,7 +45,7 @@ namespace BankTechAccountSavings.API.Controllers
         {
             try
             {
-                Paginated<GetAccountSaving> paginatedResult = await _accountService.GetPaginatedAccountsAsync(clientId, page, pageSize);
+                Paginated<GetAccountSaving> paginatedResult = await _accountService.GetPaginatedAccountsByClientIdAsync(clientId, page, pageSize);
 
                 if (paginatedResult.Items == null)
                 {
@@ -64,7 +65,7 @@ namespace BankTechAccountSavings.API.Controllers
         {
             try
             {
-                Paginated<GetTransaction> paginatedResult = await _accountService.GetPaginatedTransactionsByAccountAsync(clientId, page, pageSize);
+                Paginated<GetTransaction> paginatedResult = await _accountService.GetPaginatedTransactionsByClientIdAsync(clientId, page, pageSize);
 
                 if (paginatedResult.Items == null)
                 {
@@ -84,11 +85,31 @@ namespace BankTechAccountSavings.API.Controllers
         {
             try
             {
-                Paginated<GetTransfer> paginatedResult = await _accountService.GetPaginatedTransfersByAccountAsync(clientId, page, pageSize);
+                Paginated<GetTransfer> paginatedResult = await _accountService.GetPaginatedTransfersByClientIdAsync(clientId, page, pageSize);
 
                 if (paginatedResult.Items == null)
                 {
                     return NotFound(_accountService.FormatErrorResponse($"No Transfers Transaction were found for the client"));
+                }
+
+                return Ok(paginatedResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
+            }
+        }
+
+        [HttpGet("{clientId:int}/paginated/beneficiaries")]
+        public async Task<ActionResult<Paginated<GetBeneficiary>>> GetPaginatedBeneficiariesByAccount(int clientId, int page, int pageSize)
+        {
+            try
+            {
+                Paginated<GetBeneficiary> paginatedResult = await _accountService.GetPaginatedBeneficiariesByClientIdAsync(clientId, page, pageSize);
+
+                if (paginatedResult.Items == null)
+                {
+                    return NotFound(_accountService.FormatErrorResponse($"No Beneficiaries were found for the client"));
                 }
 
                 return Ok(paginatedResult);
@@ -124,7 +145,7 @@ namespace BankTechAccountSavings.API.Controllers
         {
             try
             {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createDeposit, _createDeposit);
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createDeposit, _createDepositValidator);
                 if (validationResult != null)
                 {
                     return validationResult;
@@ -149,7 +170,7 @@ namespace BankTechAccountSavings.API.Controllers
         {
             try
             {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createWithdraw, _createWithdraw);
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createWithdraw, _createWithdrawValidator);
                 if (validationResult != null)
                 {
                     return validationResult;
@@ -170,16 +191,43 @@ namespace BankTechAccountSavings.API.Controllers
         }
 
         [HttpPost("transfer")]
-        public async Task<ActionResult<GetTransfer>?> TransferFunds(CreateTransfer createTransfer)
+        public async Task<ActionResult<GetTransfer>?> TransferFunds(CreateBankTransfer createTransfer)
         {
             try
             {
-                ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createTransfer);
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createBankTransferValidator);
                 if (validationResult != null)
                 {
                     return validationResult;
                 }
-                GetTransfer? transaction = await _accountService.CreateTransferAsync(createTransfer);
+                
+                GetTransfer? transaction = await _accountService.CreateBankTransferAsync(createTransfer);
+
+                if (transaction == null)
+                {
+                    return NotFound("Transaction failed.");
+                }
+
+                return Ok(transaction);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
+        }
+
+        [HttpPost("interbanktransfer")]
+        public async Task<ActionResult<GetTransfer>?> InterBankTransferFunds(CreateInterBankTransfer createTransfer)
+        {
+            try
+            {
+                ActionResult? validationResult = await ValidateAndReturnResultAsync(createTransfer, _createTransferValidator);
+                if (validationResult != null)
+                {
+                    return validationResult;
+                }
+                GetTransfer? transaction = await _accountService.CreateInterBankTransferAsync(createTransfer);
 
                 if (transaction == null)
                 {

@@ -11,10 +11,12 @@ namespace BankTechAccountSavings.Domain.Entities
         public long DestinationProductNumber { get; set; }
         public long SourceProductNumber { get; set; }
         public TransferType TransferType { get; set; }
+        public InterbankTransferType? InterbankTransferType { get; set; }
         public int Commission { get; set; }
         public decimal Tax { get; set; }
         public decimal Total { get; set; }
         public decimal Credit { get; set; }
-        public decimal Debit { get; set;  }
+        public decimal Debit { get; set; }
+
     }
 }

@@ -31,7 +31,8 @@ namespace BankTechAccountSavings.Application
             services.AddScoped<IValidator<UpdateAccountSaving>, UpdateAccountSavingValidator>();
             services.AddScoped<IValidator<CreateDeposit>, CreateDepositValidator>();
             services.AddScoped<IValidator<CreateWithdraw>, CreateWithdrawValidator>();
-            services.AddScoped<IValidator<CreateTransfer>, CreateTransferValidator>();
+            services.AddScoped<IValidator<CreateInterBankTransfer>, CreateInterBankTransferValidator>();
+            services.AddScoped<IValidator<CreateBankTransfer>, CreateBankTransferValidator>();
 
             return services;
         }
@@ -51,17 +52,17 @@ namespace BankTechAccountSavings.Application
                                                                 })
                                                                 .ToList<IOpenApiAny>()
                 });
-                c.MapType<AccountType>(() => new OpenApiSchema
+                c.MapType<Bank>(() => new OpenApiSchema
                 {
                     Type = "string",
-                    Enum = Enum.GetValues(typeof(AccountType)).Cast<AccountType>()
-                                                                .Select(value =>
-                                                                {
-                                                                    var fieldInfo = value.GetType().GetField(value.ToString());
-                                                                    var attribute = fieldInfo?.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
-                                                                    return new OpenApiString((attribute?.Name) ?? value.ToString());
-                                                                })
-                                                                .ToList<IOpenApiAny>()
+                    Enum = Enum.GetValues(typeof(Bank)).Cast<Bank>()
+                                                            .Select(value =>
+                                                            {
+                                                                var fieldInfo = value.GetType().GetField(value.ToString());
+                                                                var attribute = fieldInfo?.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+                                                                return new OpenApiString((attribute?.Name) ?? value.ToString());
+                                                            })
+                                                            .ToList<IOpenApiAny>()
                 });
                 c.MapType<Currency>(() => new OpenApiSchema
                 {
@@ -111,9 +112,20 @@ namespace BankTechAccountSavings.Application
                                                                   })
                                                                   .ToList<IOpenApiAny>()
                 });
+                c.MapType<InterbankTransferType>(() => new OpenApiSchema
+                {
+                    Type = "string",
+                    Enum = Enum.GetValues(typeof(InterbankTransferType)).Cast<InterbankTransferType>()
+                                                              .Select(value =>
+                                                              {
+                                                                  var fieldInfo = value.GetType().GetField(value.ToString());
+                                                                  var attribute = fieldInfo?.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute;
+                                                                  return new OpenApiString((attribute?.Name) ?? value.ToString());
+                                                              })
+                                                              .ToList<IOpenApiAny>()
+                });
             });
             return services;
         }
-
     }
 }

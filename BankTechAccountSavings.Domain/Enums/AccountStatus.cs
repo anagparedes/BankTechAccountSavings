@@ -5,9 +5,11 @@ namespace BankTechAccountSavings.Domain.Enums
 {
     public enum AccountStatus
     {
-        [Display(Name = "Active")]
-        Active = 1,
-        [Display(Name = "Closed")]
-        Closed
+        [Display(Name = "Pendiente")]
+        Pendiente = 1,
+        [Display(Name = "Activa")]
+        Activa,
+        [Display(Name = "Cerrada")]
+        Cerrada
     }
 }

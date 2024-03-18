@@ -26,10 +26,11 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     AnnualInterestRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MonthlyInterestRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<int>(type: "int", nullable: false),
-                    DateOpened = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateClosed = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateOpened = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    DateClosed = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     AccountStatus = table.Column<int>(type: "int", nullable: false),
-                    AccountType = table.Column<int>(type: "int", nullable: false),
+                    AccountType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -44,11 +45,45 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Beneficiaries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountNumberAssociate = table.Column<long>(type: "bigint", nullable: false),
+                    BeneficiaryAccountNumber = table.Column<long>(type: "bigint", nullable: false),
+                    Bank = table.Column<int>(type: "int", nullable: false),
+                    Currency = table.Column<int>(type: "int", nullable: false),
+                    ClientId = table.Column<int>(type: "int", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IdentificationCard = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BeneficiaryName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BeneficiaryLastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Beneficiaries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Beneficiaries_AccountSavings_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "AccountSavings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TransactionDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ConfirmationNumber = table.Column<int>(type: "int", nullable: false),
                     Voucher = table.Column<long>(type: "bigint", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -58,12 +93,14 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                     Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     DestinationProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DestinationProductNumber = table.Column<long>(type: "bigint", nullable: true),
+                    Currency = table.Column<int>(type: "int", nullable: true),
                     Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     SourceProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Transfer_DestinationProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Transfer_DestinationProductNumber = table.Column<long>(type: "bigint", nullable: true),
                     SourceProductNumber = table.Column<long>(type: "bigint", nullable: true),
                     TransferType = table.Column<int>(type: "int", nullable: true),
+                    InterbankTransferType = table.Column<int>(type: "int", nullable: true),
                     Commission = table.Column<int>(type: "int", nullable: true),
                     Tax = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Total = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
@@ -115,6 +152,11 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Beneficiaries_AccountId",
+                table: "Beneficiaries",
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_DestinationProductId",
                 table: "Transactions",
                 column: "DestinationProductId");
@@ -138,6 +180,9 @@ namespace BankTechAccountSavings.Infraestructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Beneficiaries");
+
             migrationBuilder.DropTable(
                 name: "Transactions");
 

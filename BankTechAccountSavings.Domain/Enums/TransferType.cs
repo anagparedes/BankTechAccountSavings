@@ -4,9 +4,9 @@ namespace BankTechAccountSavings.Domain.Enums
 {
     public enum TransferType
     {
-        [Display(Name = "LBTR")]
-        LBTR = 1,
-        [Display(Name = "ACH")]
-        ACH
+        [Display(Name = "Propia")]
+        Propia = 1,
+        [Display(Name = "Tercero")]
+        Tercero
     }
 }

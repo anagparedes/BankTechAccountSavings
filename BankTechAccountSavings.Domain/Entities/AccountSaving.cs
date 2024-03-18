@@ -18,10 +18,12 @@ namespace BankTechAccountSavings.Domain.Entities
         public List<Transfer> TransfersAsSource { get; } = [];
         public List<Transfer> TransfersAsDestination { get; } = [];
         public List<Withdraw> WithDraws { get; } = [];
+        public List<Beneficiary> Beneficiaries { get; } = [];
         public Currency Currency { get; set; }
-        public DateTime DateOpened { get; set; }
-        public DateTime DateClosed { get; set; }
+        public DateTimeOffset DateOpened { get; set; }
+        public DateTimeOffset DateClosed { get; set; }
         public AccountStatus AccountStatus { get; set; }
-        public AccountType AccountType { get; set; }
+        public string? AccountType { get; set; }
+        public bool IsActive { get; set; }
     }
 }

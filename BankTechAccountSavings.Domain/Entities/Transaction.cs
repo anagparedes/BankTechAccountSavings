@@ -5,7 +5,7 @@ namespace BankTechAccountSavings.Domain.Entities
 {
     internal abstract class Transaction: BaseEntity
     {
-        public DateTime TransactionDate { get; set; }
+        public DateTimeOffset TransactionDate { get; set; }
         public int ConfirmationNumber { get; set; }
         public long Voucher { get; set; }   
         public string? Description { get; set; }

@@ -1,6 +1,7 @@
 ﻿using BankTechAccountSavings.Domain.Entities;
 using BankTechAccountSavings.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BankTechAccountSavings.Infraestructure.Context
 {
@@ -13,6 +14,7 @@ namespace BankTechAccountSavings.Infraestructure.Context
         internal DbSet<Deposit> Deposits { get; set; }
         internal DbSet<Withdraw> Withdraws { get; set; }
         internal DbSet<Transfer> Transfers { get; set; }
+        internal DbSet<Beneficiary> Beneficiaries {  get; set; } 
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,6 +52,18 @@ namespace BankTechAccountSavings.Infraestructure.Context
                 .WithOne(d => d.DestinationProduct)
                 .HasForeignKey(d => d.DestinationProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Beneficiary>()
+                .HasOne(b => b.AccountSavingAssociate)
+                .WithMany(acc => acc.Beneficiaries)
+                .HasForeignKey(b => b.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AccountSaving>()
+               .HasMany(acc => acc.Beneficiaries)
+               .WithOne(b => b.AccountSavingAssociate)
+               .HasForeignKey(b => b.AccountId)
+               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Withdraw>()
                .HasOne(t => t.SourceProduct)

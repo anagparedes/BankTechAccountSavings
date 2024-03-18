@@ -12,6 +12,8 @@ namespace BankTechAccountSavings.Infraestructure.Context
 
         private void SetAuditEntities()
         {
+            DateTimeOffset utcNow = DateTimeOffset.UtcNow;
+            DateTimeOffset createdDate = utcNow.ToOffset(TimeSpan.FromHours(-4));
             string email = "Anonymous";
 
             foreach (var entry in ChangeTracker.Entries<IBaseEntity>())
@@ -21,7 +23,7 @@ namespace BankTechAccountSavings.Infraestructure.Context
                     case EntityState.Added:
 
                         entry.Entity.IsDeleted = false;
-                        entry.Entity.CreatedDate = DateTimeOffset.UtcNow;
+                        entry.Entity.CreatedDate = createdDate;
                         entry.Entity.CreatedBy = email;
                         break;
 

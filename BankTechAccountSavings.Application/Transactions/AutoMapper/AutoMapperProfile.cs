@@ -8,8 +8,11 @@ namespace BankTechTransactions.Application.Transactions.AutoMapper
     {
         public AutoMapperProfile()
         {
-            CreateMap<CreateTransfer, Transfer>();
-            CreateMap<Transfer, CreateTransfer>();
+            CreateMap<CreateInterBankTransfer, Transfer>();
+            CreateMap<Transfer, CreateInterBankTransfer>();
+
+            CreateMap<CreateBankTransfer, Transfer>();
+            CreateMap<Transfer, CreateBankTransfer>();
 
             CreateMap<GetTransfer, Transfer>();
             CreateMap<Transfer, GetTransfer>();
@@ -31,6 +34,7 @@ namespace BankTechTransactions.Application.Transactions.AutoMapper
 
             CreateMap<GetTransaction, Transaction>();
             CreateMap<Transaction, GetTransaction>();
+
         }
     }
 }

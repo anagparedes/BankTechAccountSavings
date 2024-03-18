@@ -19,7 +19,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return accountSaving.Select(st => _mapper.Map<GetAccountSaving>(st)).ToList();
         }
 
-        async Task<Paginated<GetAccountSaving>> IAccountSavingService.GetPaginatedAccountsAsync(int clientId, int page, int pageSize)
+        async Task<Paginated<GetAccountSaving>> IAccountSavingService.GetPaginatedAccountsByClientIdAsync(int clientId, int page, int pageSize)
         {
             IQueryable<AccountSaving> queryable = _accountSavingRepository.GetAllQueryable(clientId);
             Paginated<AccountSaving> paginatedResult = await _accountSavingRepository.GetAccountsPaginatedAsync(queryable, page, pageSize);
@@ -39,9 +39,9 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             };
         }
 
-        async Task<Paginated<GetTransaction>> IAccountSavingService.GetPaginatedTransactionsByAccountAsync(int ClientId, int page, int pageSize)
+        async Task<Paginated<GetTransaction>> IAccountSavingService.GetPaginatedTransactionsByClientIdAsync(int ClientId, int page, int pageSize)
         {
-            IQueryable<Transaction> queryable = _accountSavingRepository.GetTransactionsByAccountQueryable(ClientId);
+            IQueryable<Transaction> queryable = _accountSavingRepository.GetTransactionsByClientQueryable(ClientId);
 
             Paginated<Transaction> paginatedResult = await _accountSavingRepository.GetTransactionsPaginatedAsync(queryable, page, pageSize);
 
@@ -84,11 +84,9 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
         async Task<CreatedAccountSavingResponse?> IAccountSavingService.CreateAccountSavingAsync(CreateAccountSaving createAccountSaving)
         {
-            var account = new AccountSaving
+            AccountSaving account = new()
             {
                 ClientId = createAccountSaving.ClientId,
-                CurrentBalance = createAccountSaving.CurrentBalance,
-                AccountType = createAccountSaving.AccountType,
                 Currency = createAccountSaving.Currency,
             };
             AccountSaving? newAccount = await _accountSavingRepository.CreateAsync(account);
@@ -107,8 +105,8 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
                 Description = createDeposit.Description,
             };
             Deposit? transaction = await _accountSavingRepository.CreateDepositAsync(deposit);
-            await _accountSavingRepository.SaveChangesAsync();
-            return _mapper.Map<GetDeposit>(transaction);
+                await _accountSavingRepository.SaveChangesAsync();
+                return _mapper.Map<GetDeposit>(transaction);
         }
 
         async Task<GetWithdraw?> IAccountSavingService.CreateWithdrawAsync(CreateWithdraw createWithdraw)
@@ -123,7 +121,22 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return _mapper.Map<GetWithdraw>(transaction);
         }
 
-        async Task<GetTransfer?> IAccountSavingService.CreateTransferAsync(CreateTransfer createTransfer)
+        async Task<GetTransfer?> IAccountSavingService.CreateBankTransferAsync(CreateBankTransfer createTransfer)
+        {
+            var transfer = new Transfer
+            {
+                DestinationProductNumber = createTransfer.DestinationProductNumber,
+                SourceProductNumber = createTransfer.SourceProductNumber,
+                Amount = createTransfer.Amount,
+                Description = createTransfer.Description,
+                TransferType = createTransfer.TransferType,
+            };
+            Transfer? transaction = await _accountSavingRepository.CreateBankTransferAsync(transfer);
+            await _accountSavingRepository.SaveChangesAsync();
+            return _mapper.Map<GetTransfer>(transaction);
+        }
+
+        async Task<GetTransfer?> IAccountSavingService.CreateInterBankTransferAsync(CreateInterBankTransfer createTransfer)
         {
             var transfer = new Transfer
             {
@@ -133,7 +146,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
                 Description = createTransfer.Description,
                 TransferType = createTransfer.TransferType
             };
-            Transfer? transaction = await _accountSavingRepository.CreateTransferAsync(transfer);
+            Transfer? transaction = await _accountSavingRepository.CreateInterBankTransferAsync(transfer);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<GetTransfer>(transaction);
         }
@@ -162,9 +175,9 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
             return $"\"errorMessage\": \"{errorMessage}\"";
         }
 
-        public async Task<Paginated<GetTransfer>> GetPaginatedTransfersByAccountAsync(int clientId, int page, int pageSize)
+        public async Task<Paginated<GetTransfer>> GetPaginatedTransfersByClientIdAsync(int clientId, int page, int pageSize)
         {
-            IQueryable<Transfer> queryable = _accountSavingRepository.GetTransfersByAccountQueryable(clientId);
+            IQueryable<Transfer> queryable = _accountSavingRepository.GetTransfersByClientQueryable(clientId);
 
             Paginated<Transfer> paginatedResult = await _accountSavingRepository.GetTransfersPaginatedAsync(queryable, page, pageSize);
 
@@ -175,6 +188,27 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
                 : throw new InvalidOperationException("There are no transfer transactions");
 
             return new Paginated<GetTransfer>
+            {
+                Items = result,
+                TotalItems = paginatedResult.TotalItems,
+                PageSize = pageSize,
+                CurrentPage = page
+            };
+        }
+
+        public async Task<Paginated<GetBeneficiary>> GetPaginatedBeneficiariesByClientIdAsync(int clientId, int page, int pageSize)
+        {
+            IQueryable<Beneficiary> queryable = _accountSavingRepository.GetBeneficiariesByClientQueryable(clientId);
+
+            Paginated<Beneficiary> paginatedResult = await _accountSavingRepository.GetBeneficiaryPaginatedAsync(queryable, page, pageSize);
+
+            List<GetBeneficiary> result = paginatedResult.Items?.Count > 0
+                ? paginatedResult.Items.Select(st => _mapper.Map<GetBeneficiary>(st)).ToList()
+                : paginatedResult.CurrentPage > paginatedResult.TotalPages
+                ? throw new InvalidOperationException("There are no more beneficiaries to display")
+                : throw new InvalidOperationException("There are no beneficiaries");
+
+            return new Paginated<GetBeneficiary>
             {
                 Items = result,
                 TotalItems = paginatedResult.TotalItems,
