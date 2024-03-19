@@ -6,7 +6,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Interfaces
 {
     public interface IAccountSavingService
     {
-        Task<List<GetAccountSaving>> GetAllAccountsAsync();
         Task<CreatedAccountSavingResponse?> CreateAccountSavingAsync(CreateAccountSaving createAccountSaving);
         Task<UpdatedAccountSavingResponse?> UpdateAccountSavingAsync(Guid accountId, UpdateAccountSaving updateAccountSaving);
         Task<DeletedAccountSavingResponse?> DeleteAccountSavingAsync(Guid accountId, string reasonToCloseAccount);

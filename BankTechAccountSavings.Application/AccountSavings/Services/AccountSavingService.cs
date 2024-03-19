@@ -13,12 +13,6 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
         private readonly IAccountSavingRepository _accountSavingRepository = accountSavingRepository;
         private readonly IMapper _mapper = mapper;
 
-        async Task<List<GetAccountSaving>> IAccountSavingService.GetAllAccountsAsync()
-        {
-            List<AccountSaving>? accountSaving = await _accountSavingRepository.GetAllAsync();
-            return accountSaving.Select(st => _mapper.Map<GetAccountSaving>(st)).ToList();
-        }
-
         async Task<Paginated<GetAccountSaving>> IAccountSavingService.GetPaginatedAccountsByClientIdAsync(int clientId, int page, int pageSize)
         {
             IQueryable<AccountSaving> queryable = _accountSavingRepository.GetAllQueryable(clientId);
@@ -98,7 +92,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
         async Task<GetDeposit?> IAccountSavingService.AddDepositAsync(CreateDeposit createDeposit)
         {
-            var deposit = new Deposit
+            Deposit deposit = new()
             {
                 Amount = createDeposit.Amount,
                 DestinationProductNumber = createDeposit.DestinationProductNumber,
@@ -111,7 +105,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
         async Task<GetWithdraw?> IAccountSavingService.CreateWithdrawAsync(CreateWithdraw createWithdraw)
         {
-            var withDraw = new Withdraw
+            Withdraw withDraw = new()
             {
                 Amount = createWithdraw.Amount,
                 SourceProductNumber = createWithdraw.SourceProductNumber,
@@ -123,7 +117,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
         async Task<GetTransfer?> IAccountSavingService.CreateBankTransferAsync(CreateBankTransfer createTransfer)
         {
-            var transfer = new Transfer
+            Transfer transfer = new()
             {
                 DestinationProductNumber = createTransfer.DestinationProductNumber,
                 SourceProductNumber = createTransfer.SourceProductNumber,
@@ -138,7 +132,7 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
         async Task<GetTransfer?> IAccountSavingService.CreateInterBankTransferAsync(CreateInterBankTransfer createTransfer)
         {
-            var transfer = new Transfer
+            Transfer transfer = new()
             {
                 DestinationProductNumber = createTransfer.DestinationProductNumber,
                 SourceProductNumber = createTransfer.SourceProductNumber,
@@ -153,12 +147,12 @@ namespace BankTechAccountSavings.Application.AccountSavings.Services
 
         async Task<UpdatedAccountSavingResponse?> IAccountSavingService.UpdateAccountSavingAsync(Guid accountId, UpdateAccountSaving updateAccountSaving)
         {
-            var account = new AccountSaving
+            AccountSaving account = new()
             {
                 AccountName = updateAccountSaving.AccountName,
                 AccountStatus = updateAccountSaving.AccountStatus,
             };
-            var newAccount = await _accountSavingRepository.UpdateAsync(accountId, account);
+            AccountSaving? newAccount = await _accountSavingRepository.UpdateAsync(accountId, account);
             await _accountSavingRepository.SaveChangesAsync();
             return _mapper.Map<UpdatedAccountSavingResponse>(newAccount);
         }

@@ -4,7 +4,6 @@ namespace BankTechAccountSavings.Domain.Interfaces
 {
     public interface IRepository<T> where T : class
     {
-        Task<List<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<T?> GetbyIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<T?> CreateAsync(T entity, CancellationToken cancellationToken = default);
         Task<T?> UpdateAsync(Guid id, T entity, CancellationToken cancellationToken = default);

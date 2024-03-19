@@ -19,27 +19,6 @@ namespace BankTechAccountSavings.API.Controllers
         private readonly IValidator<CreateBankTransfer> _createBankTransferValidator = createBankTransfer;
         private readonly IValidator<CreateInterBankTransfer> _createTransferValidator = createTransferValidator;
 
-        [HttpGet()]
-        public async Task<ActionResult<List<GetAccountSaving>>> GetAccounts()
-        {
-            try
-            {
-                List<GetAccountSaving> accountSavings = await _accountService.GetAllAccountsAsync();
-
-                if (accountSavings == null || accountSavings.Count == 0)
-                {
-                    return NotFound(_accountService.FormatErrorResponse("No Accounts were found"));
-                }
-
-                return Ok(accountSavings);
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, _accountService.FormatErrorResponse(ex.Message));
-            }
-        }
-
         [HttpGet("{clientId:int}/paginated")]
         public async Task<ActionResult<Paginated<GetAccountSaving>>> GetPaginatedAccounts(int clientId, int page, int pageSize)
         {

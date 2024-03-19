@@ -9,35 +9,33 @@ namespace BankTechAccountSavings.Domain.Enums
 {
     public enum Bank
     {
-        [Display(Name = "BanReservas")]
+        [Display(Name = "Banco De Reservas De La R.D.")]
         BanReservas = 1,
-        [Display(Name = "Banco Popular Dominicano")]
-        BancoPopularDominicano,
-        [Display(Name = "Banco BHD Leon")]
-        BancoBHDLeon,
-        [Display(Name = "Banco Santa Cruz")]
-        BancoSantaCruz,
-        [Display(Name = "Banco Caribe")]
-        BancoCaribe,
-        [Display(Name = "Banco BDI")]
-        BancoBDI,
-        [Display(Name = "Banco Vimenca")]
-        BancoVimenca,
-        [Display(Name = "Banco Lopez de Haro")]
-        BancoLopezdeHaro,
-        [Display(Name = "Bancamérica")]
-        Bancamérica,
-        [Display(Name = "Banesco")]
+        [Display(Name = "Banco Popular Dominicano Banco Multiple")]
+        PopularDominicano,
+        [Display(Name = "Banco Multiple BHD")]
+        BHDLeon,
+        [Display(Name = "Banco Multiple Santa Cruz")]
+        SantaCruz,
+        [Display(Name = "Banco Multiple Caribe Internacional")]
+        Caribe,
+        [Display(Name = "Banco Multiple BDI")]
+        BDI,
+        [Display(Name = "Banco Multiple Vimenca")]
+        Vimenca,
+        [Display(Name = "Banco Multiple Lopez de Haro")]
+        LopezdeHaro,
+        [Display(Name = "Banco Multiple Ademi")]
+        Ademi,
+        [Display(Name = "Banesco Banco Multiple")]
         Banesco,
-        [Display(Name = "Scotiabank")]
+        [Display(Name = "The Bank of Nova Scotia")]
         Scotiabank,
-        [Display(Name = "Banco Promerica")]
-        BancoPromerica,
+        [Display(Name = "Banco Multiple Promerica De La R.D.")]
+        Promerica,
         [Display(Name = "Asociación Popular de Ahorros y Préstamos")]
         AsociaciónPopulardeAhorrosyPréstamos,
-        [Display(Name = "Asociación Cibao")]
-        AsociaciónCibao,
-        [Display(Name = "Asociación La Nacional")]
+        [Display(Name = "Asociación La Nacional de Ahorros y Préstamos")]
         AsociaciónLaNacional,
 
     }

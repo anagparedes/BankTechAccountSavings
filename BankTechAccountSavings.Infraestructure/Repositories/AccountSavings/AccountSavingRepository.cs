@@ -72,10 +72,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             return account;
         }
 
-        public async Task<List<AccountSaving>> GetAllAsync(CancellationToken cancellationToken)
-        {
-            return await _context.Set<AccountSaving>().Where(x => !x.IsDeleted).ToListAsync(cancellationToken);
-        }
         public async Task<Paginated<AccountSaving>> GetAccountsPaginatedAsync(IQueryable<AccountSaving> queryable, int page, int pageSize)
         {
             var totalItems = await queryable.CountAsync();
@@ -159,52 +155,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
             AccountSaving? account = await _context.Set<AccountSaving>().FirstOrDefaultAsync(s => s.Id == accountId);
 
             return _current_date.Month != account?.DateOpened.Month || _current_date.Year != account.DateOpened.Year;
-        }
-
-        private long GenerateBankAccountNumber()
-        {
-            long minAccountNumber = 1000000000;
-            long maxAccountNumber = 9999999999;
-            long accountNumber = (long)(_random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
-
-            return accountNumber;
-        }
-
-        private long GenerateWithdrawPassword()
-        {
-            long minAccountNumber = 10000000;
-            long maxAccountNumber = 99999999;
-            long accountNumber = (long)(_random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
-            return accountNumber;
-        }
-
-        private long GenerateWithdrawCode()
-        {
-            long minAccountNumber = 1000;
-            long maxAccountNumber = 9999;
-
-            long accountNumber = (long)(_random.NextDouble() * (maxAccountNumber - minAccountNumber) + minAccountNumber);
-            return accountNumber;
-        }
-
-        private int GenerateConfirmationNumber()
-        {
-
-            int minConfirmationNumber = 1000000;
-            int maxConfirmationNumber = 9999999;
-
-            int confirmationNumber = _random.Next(minConfirmationNumber, maxConfirmationNumber + 1);
-
-            return confirmationNumber;
-        }
-        private long GenerateVoucherNumber()
-        {
-            long minConfirmationNumber = 1000000000;
-            long maxConfirmationNumber = 9999999999;
-
-            long confirmationNumber = (long)(_random.NextDouble() * (maxConfirmationNumber - minConfirmationNumber) + minConfirmationNumber);
-
-            return confirmationNumber;
         }
 
         public IQueryable<AccountSaving> GetAllQueryable(int clientId)
@@ -293,7 +243,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     Voucher = GenerateVoucherNumber(),
                     Description = entity.Description,
                     TransactionType = TransactionType.Deposit,
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Amount = entity.Amount,
                 };
                 account.Deposits.Add(newDeposit);
@@ -302,7 +252,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 return account.Deposits.LastOrDefault();
 
             }
-            else if(beneficiary is not null)
+            else if (beneficiary is not null)
             {
                 if (beneficiary.Currency != entity.Currency)
                 {
@@ -322,9 +272,6 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     }
                 }
 
-
-                //beneficiary.CurrentBalance += entity.Amount;
-
                 Deposit newDeposit = new()
                 {
                     DestinationProductNumber = beneficiary.BeneficiaryAccountNumber,
@@ -333,12 +280,9 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     Voucher = GenerateVoucherNumber(),
                     Description = entity.Description,
                     TransactionType = TransactionType.Deposit,
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Amount = entity.Amount,
                 };
-                //beneficiary.Deposits.Add(newDeposit);
-                //TODO: Tengo que guardarlo en base de datos (?)
-                //await _context.Set<Deposit>().AddAsync(newDeposit, cancellationToken);
 
                 return newDeposit;
             }
@@ -411,7 +355,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     TransactionDate = _current_date,
                     ConfirmationNumber = GenerateConfirmationNumber(),
                     Voucher = GenerateVoucherNumber(),
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Commission = 0,
                     Amount = entity.Amount,
                     Tax = 0.0015m * entity.Amount,
@@ -450,7 +394,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     TransactionDate = _current_date,
                     ConfirmationNumber = GenerateConfirmationNumber(),
                     Voucher = GenerateVoucherNumber(),
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Amount = entity.Amount,
                     Commission = 0,
                     Tax = 0.0015m * entity.Amount,
@@ -494,7 +438,20 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 throw new InvalidOperationException("Insufficient funds: The transfer amount exceeds the current balance");
             }
             //TODO: verificar de que funcione
-            int commission = (entity.InterbankTransferType == InterbankTransferType.LBTR) ? 100 : 0;
+            decimal commission = 0;
+
+            if (entity.InterbankTransferType == InterbankTransferType.LBTR && fromAccount.Currency != toAccount.Currency)
+            {
+                if (toAccount.Currency == Currency.DOP)
+                {
+                    commission = ConvertToDominicanPeso(100);
+                }
+                else if (toAccount.Currency == Currency.USD)
+                {
+                    commission = ConvertToUSD(100);
+                }
+            }
+
 
             if (entity.TransferType == TransferType.Tercero)
             {
@@ -534,7 +491,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     TransactionDate = _current_date,
                     ConfirmationNumber = GenerateConfirmationNumber(),
                     Voucher = GenerateVoucherNumber(),
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Amount = entity.Amount,
                     Tax = 0.0015m * entity.Amount,
                     Total = (entity.Amount + commission + (0.0015m * entity.Amount)),
@@ -569,7 +526,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     TransactionDate = _current_date,
                     ConfirmationNumber = GenerateConfirmationNumber(),
                     Voucher = GenerateVoucherNumber(),
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Amount = entity.Amount,
                     Tax = 0.0015m * entity.Amount,
                     Total = (entity.Amount + commission + (0.0015m * entity.Amount)),
@@ -616,7 +573,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                 Voucher = GenerateVoucherNumber(),
                 Description = $"Withdraw on day: {DateTime.UtcNow.Date.ToLocalTime()}",
                 TransactionType = TransactionType.WithDraw,
-                TransactionStatus = TransactionStatus.Completed,
+                TransactionStatus = TransactionStatus.Completado,
                 Tax = 0.0015m * entity.Amount,
                 Total = (entity.Amount + (0.0015m * entity.Amount))
             };
@@ -680,7 +637,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     AccountNumberAssociate = account.AccountNumber,
                     AccountId = account.Id,
                     ClientId = account.ClientId,
-                    BeneficiaryAccountNumber = 00123456789012345678,
+                    BeneficiaryAccountNumber = 012345678,
                     Currency = Currency.DOP,
                     Bank = Bank.BanReservas,
                     IdentificationCard = "001-1234567-8",
@@ -693,22 +650,36 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     AccountSavingAssociate = account,
                     AccountNumberAssociate = account.AccountNumber,
                     AccountId = account.Id,
-                    ClientId = 1,
-                    BeneficiaryAccountNumber = 0301234567890,
+                    ClientId = account.ClientId,
+                    BeneficiaryAccountNumber = 012345678,
                     Currency = Currency.USD,
-                    Bank = Bank.BancoBHDLeon,
-                    IdentificationCard = "001-7654321-4",
-                    BeneficiaryName = "María",
-                    BeneficiaryLastName = "Rodríguez",
-                    Email = "mrodriguez@example.com"
+                    Bank = Bank.BHDLeon,
+                    IdentificationCard = "001-1234567-8",
+                    BeneficiaryName = "Juan",
+                    BeneficiaryLastName = "Díaz",
+                    Email = "juandiaz@example.com",
                 };
-
                 Beneficiary thirdBeneficiary = new()
                 {
                     AccountSavingAssociate = account,
                     AccountNumberAssociate = account.AccountNumber,
                     AccountId = account.Id,
                     ClientId = 2,
+                    BeneficiaryAccountNumber = 0301234567890,
+                    Currency = Currency.USD,
+                    Bank = Bank.PopularDominicano,
+                    IdentificationCard = "001-7654321-4",
+                    BeneficiaryName = "María",
+                    BeneficiaryLastName = "Rodríguez",
+                    Email = "mrodriguez@example.com"
+                };
+
+                Beneficiary fourthBeneficiary = new()
+                {
+                    AccountSavingAssociate = account,
+                    AccountNumberAssociate = account.AccountNumber,
+                    AccountId = account.Id,
+                    ClientId = 3,
                     BeneficiaryAccountNumber = 54317390275,
                     Currency = Currency.USD,
                     Bank = Bank.Scotiabank,
@@ -718,42 +689,26 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     Email = "mcastillo@example.com"
                 };
 
-                Beneficiary fourthBeneficiary = new()
+                Beneficiary fifthBeneficiary = new()
                 {
                     AccountSavingAssociate = account,
                     AccountNumberAssociate = account.AccountNumber,
                     AccountId = account.Id,
-                    ClientId = 3,
+                    ClientId = 4,
                     BeneficiaryAccountNumber = 64317390275,
                     Currency = Currency.DOP,
-                    Bank = Bank.BancoSantaCruz,
+                    Bank = Bank.SantaCruz,
                     IdentificationCard = "001-7654321-5",
                     BeneficiaryName = "Laura",
                     BeneficiaryLastName = "García",
                     Email = "lgarcia@example.com"
                 };
 
-                /*Beneficiary fifthBeneficiary = new()
-                {
-                    AccountSavingAssociate = account,
-                    AccountNumberAssociate = account.AccountNumber,
-                    AccountId = account.Id,
-                    ClientId = account.ClientId,
-                    BeneficiaryAccountNumber = 00123456789012345675,
-                    Currency = Currency.DOP,
-                    Bank = Bank.BanReservas,
-                    IdentificationCard = "001-0644278-3",
-                    BeneficiaryName = "John",
-                    BeneficiaryLastName = "Doe",
-                    Email = "jdoe@example.com"
-                };
-*/
                 account.Beneficiaries.Add(firstBeneficiary);
                 account.Beneficiaries.Add(secondBeneficiary);
                 account.Beneficiaries.Add(thirdBeneficiary);
                 account.Beneficiaries.Add(fourthBeneficiary);
-                //account.Beneficiaries.Add(fifthBeneficiary);
-
+                account.Beneficiaries.Add(fifthBeneficiary);
 
                 Deposit newTransaction = new()
                 {
@@ -765,7 +720,7 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
                     Voucher = GenerateVoucherNumber(),
                     Description = deposit.Description,
                     TransactionType = TransactionType.Deposit,
-                    TransactionStatus = TransactionStatus.Completed,
+                    TransactionStatus = TransactionStatus.Completado,
                     Amount = deposit.Amount,
                 };
                 account.Deposits.Add(newTransaction);
@@ -800,6 +755,50 @@ namespace BankTechAccountSavings.Infraestructure.Repositories.AccountSavings
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return _context.SaveChangesAsync(cancellationToken);
+        }
+        private long GenerateBankAccountNumber()
+        {
+            const long minAccountNumber = 100000000;
+            const long maxAccountNumber = 999999999;
+            long accountNumber = _random.Next((int)minAccountNumber, (int)maxAccountNumber);
+            return accountNumber;
+        }
+
+        private long GenerateWithdrawPassword()
+        {
+            const long minWithdrawNumber = 10000000;
+            const long maxWithdrawNumber = 99999999;
+            long withdrawPassword = _random.Next((int)minWithdrawNumber, (int)maxWithdrawNumber);
+            return withdrawPassword;
+        }
+
+        private long GenerateWithdrawCode()
+        {
+            const int minWithdrawCode = 1000;
+            const int maxWithdrawCode = 9999;
+
+            long withdrawCode = _random.Next(minWithdrawCode, maxWithdrawCode + 1);
+            return withdrawCode;
+        }
+
+        private int GenerateConfirmationNumber()
+        {
+
+            const int minConfirmationNumber = 1000000;
+            const int maxConfirmationNumber = 9999999;
+
+            int confirmationNumber = _random.Next(minConfirmationNumber, maxConfirmationNumber + 1);
+
+            return confirmationNumber;
+        }
+        private long GenerateVoucherNumber()
+        {
+            const long minVoucherNumber = 100000000;
+            const long maxVoucherNumber = 999999999;
+
+            long confirmationNumber = _random.Next((int)minVoucherNumber, (int)maxVoucherNumber);
+
+            return confirmationNumber;
         }
     }
 }
